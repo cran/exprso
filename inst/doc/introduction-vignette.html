@@ -12,7 +12,7 @@
 
 <meta name="author" content="Thomas Quinn" />
 
-<meta name="date" content="2016-09-27" />
+<meta name="date" content="2016-12-23" />
 
 <title>An Introduction to the exprso Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">An Introduction to the exprso Package</h1>
 <h4 class="author"><em>Thomas Quinn</em></h4>
-<h4 class="date"><em>2016-09-27</em></h4>
+<h4 class="date"><em>2016-12-23</em></h4>
 
 
 
@@ -296,9 +296,9 @@ array &lt;-
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">pipeSubset</span>(gs, <span class="dt">colBy =</span> <span class="st">&quot;cost&quot;</span>, <span class="dt">include =</span> <span class="dv">1</span>)</code></pre></div>
 <pre><code>## Accuracy summary (complete summary stored in @summary slot):
 ## 
-##   top kernel cost fold train.plCV train.acc train.sens train.spec
-## 7   5 linear    1    0          1         1          1          1
-## 8  10 linear    1    0          1         1          1          1
+##      build top kernel cost fold train.plCV train.acc train.sens train.spec
+## 7 buildSVM   5 linear    1    0          1         1          1          1
+## 8 buildSVM  10 linear    1    0          1         1          1          1
 ##   train.auc valid.acc valid.sens valid.spec valid.auc
 ## 7         1     0.875      0.875      0.875  0.859375
 ## 8         1     0.875      0.875      0.875  0.921875
@@ -317,9 +317,9 @@ array &lt;-
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">subset</span>(gs, <span class="dt">subset =</span> gs$cost ==<span class="st"> </span><span class="dv">1</span>)</code></pre></div>
 <pre><code>## Accuracy summary (complete summary stored in @summary slot):
 ## 
-##   top kernel cost fold train.plCV train.acc train.sens train.spec
-## 7   5 linear    1    0          1         1          1          1
-## 8  10 linear    1    0          1         1          1          1
+##      build top kernel cost fold train.plCV train.acc train.sens train.spec
+## 7 buildSVM   5 linear    1    0          1         1          1          1
+## 8 buildSVM  10 linear    1    0          1         1          1          1
 ##   train.auc valid.acc valid.sens valid.spec valid.auc
 ## 7         1     0.875      0.875      0.875  0.859375
 ## 8         1     0.875      0.875      0.875  0.921875
@@ -373,7 +373,7 @@ gs &lt;-
 <div id="ensemble-classifiers" class="section level2">
 <h2>Ensemble classifiers</h2>
 <p>This package provides two ways to build ensemble classifiers. The first involves manually combining multiple <code>ExprsModel</code> objects together through the function <code>buildEnsemble</code> (or <code>?conjoin</code>). The second involves an orchestrated manipulation of an <code>ExprsPipeline</code> object through the <code>pipeFilter</code> function.</p>
-<p>This latter approach filters an <code>ExprsPipeline</code> object in (up to) three steps. First, a threshold filter gets imposed, whereby any model with a performance less than the threshold filter, <code>how</code>, gets excluded. Second, a ceiling filter gets imposed, whereby any model with a performance less than the ceiling filter, <code>gate</code>, gets excluded. Third, an arbitrary subset occurs, whereby the top <em>N</em> models in the <code>ExprsPipeline</code> object get selected based on the argument <code>top</code>. In the case that the <code>@summary</code> slot contains the column “boot” (e.g., in the results of <code>plMonteCarlo</code>), <code>pipeFilter</code> selects the top <em>N</em> models for <em>each</em> unique bootstrap. The user may skip any one of these three filter steps by setting the respective argument to 0.</p>
+<p>This latter approach filters an <code>ExprsPipeline</code> object in (up to) three steps. First, a threshold filter gets imposed, whereby any model with a performance less than the threshold filter, <code>how</code>, gets excluded. Second, a ceiling filter gets imposed, whereby any model with a performance greater than the ceiling filter, <code>gate</code>, gets excluded. Third, an arbitrary subset occurs, whereby the top <em>N</em> models in the <code>ExprsPipeline</code> object get selected based on the argument <code>top</code>. In the case that the <code>@summary</code> slot contains the column “boot” (e.g., in the results of <code>plMonteCarlo</code>), <code>pipeFilter</code> selects the top <em>N</em> models for <em>each</em> unique bootstrap. The user may skip any one of these three filter steps by setting the respective argument to 0.</p>
 <p>When calling the <code>buildEnsemble</code> method for an <code>ExprsPipeline</code> object, any classifiers remaining after the <code>pipeFilter</code> filter will get assembled into a single ensemble classifier. Ensemble classifiers get stored as an <code>ExprsEnsemble</code> object which is nothing more than object-oriented container for a list of multiple <code>ExprsModel</code> objects.</p>
 <p>In the example below, we we will build an ensemble using the single best classifier from each <code>plMonteCarlo</code> bootstrap, and then deploy that ensemble on the withheld test set from above.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ens &lt;-<span class="st"> </span><span class="kw">buildEnsemble</span>(boot, <span class="dt">top =</span> <span class="dv">1</span>, <span class="dt">colBy =</span> <span class="st">&quot;valid.auc&quot;</span>)
@@ -382,10 +382,10 @@ pred &lt;-<span class="st"> </span><span class="kw">predict</span>(ens, array.te
 ## Classification confusion table:
 ##          actual
 ## predicted Control Case
-##   Control       7    1
-##   Case          1    7</code></pre>
-<pre><code>##     acc  sens  spec
-## 1 0.875 0.875 0.875</code></pre>
+##   Control       0    0
+##   Case          8    8</code></pre>
+<pre><code>##   acc sens spec
+## 1 0.5    1    0</code></pre>
 <p>Owing to how the <code>pipeFilter</code> function handles <code>ExprsPipeline</code> objects that contain a “boot” column in the performance summary (i.e., <code>@summary</code>), we include the <code>pipeUnboot</code> function to rename this “boot” column to “unboot”. To learn more about how <code>ExprsEnsemble</code> predicts class labels, we refer the user to the package documentation, <code>?'exprso-predict'</code>. In addition, we encourage the user to visit the package documentation, <code>?'ExprsPipeline-class'</code> and <code>?'ExprsEnsemble-class'</code>, for more information on pipelines and ensembles, respectively.</p>
 </div>
 <div id="multi-class-methods" class="section level2">

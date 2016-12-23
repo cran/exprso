@@ -111,6 +111,22 @@ pl <- data(Golub_Merge) %>% get %>%
   plNested(fold = 2, ctrlFS = fs.outer, ctrlGS = gs.outer)
 
 ## ---- results = "hide"---------------------------------------------------
+fs.inner <- ctrlFeatureSelect(func = "fsStats", top = 0, how = "t.test")
+gs.inner <- ctrlGridSearch(func = "plGrid", top = c(2, 3, 4), how = "buildSVM", fold = NULL)
+
+ss.outer <- ctrlSplitSet(func = "splitStratify", percent.include = 67)
+fs.outer <- ctrlFeatureSelect(func = "fsNULL", top = 0)
+gs.outer <- ctrlGridSearch(func = "plNested", fold = 10, ctrlFS = fs.inner, ctrlGS = gs.inner)
+
+pl <- data(Golub_Merge) %>% get %>%
+  arrayExprs(colBy = "ALL.AML", include = list("ALL", "AML")) %>%
+  modFilter(20, 16000, 500, 5) %>% modTransform %>% modNormalize %>%
+  plMonteCarlo(B = 5, ctrlSS = ss.outer, ctrlFS = fs.outer, ctrlGS = gs.outer)
+
+## ---- results = "hide"---------------------------------------------------
+top <- pipeFilter(pl, colBy = c("valid.sens", "valid.sens", "valid.spec"), top = 1)
+
+## ---- results = "hide"---------------------------------------------------
 splitSets <- data(arrayMulti) %>% get %>%
   splitStratify(percent.include = 67, colBy = "sex")
 

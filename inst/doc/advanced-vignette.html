@@ -12,7 +12,7 @@
 
 <meta name="author" content="Thomas Quinn" />
 
-<meta name="date" content="2016-09-27" />
+<meta name="date" content="2016-12-23" />
 
 <title>Advanced Topics for the exprso Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Advanced Topics for the exprso Package</h1>
 <h4 class="author"><em>Thomas Quinn</em></h4>
-<h4 class="date"><em>2016-09-27</em></h4>
+<h4 class="date"><em>2016-12-23</em></h4>
 
 
 
@@ -196,6 +196,24 @@ pl &lt;-<span class="st"> </span><span class="kw">data</span>(Golub_Merge) %&gt;
 <span class="st">  </span><span class="kw">arrayExprs</span>(<span class="dt">colBy =</span> <span class="st">&quot;ALL.AML&quot;</span>, <span class="dt">include =</span> <span class="kw">list</span>(<span class="st">&quot;ALL&quot;</span>, <span class="st">&quot;AML&quot;</span>)) %&gt;%
 <span class="st">  </span><span class="kw">modFilter</span>(<span class="dv">20</span>, <span class="dv">16000</span>, <span class="dv">500</span>, <span class="dv">5</span>) %&gt;%<span class="st"> </span>modTransform %&gt;%<span class="st"> </span>modNormalize %&gt;%
 <span class="st">  </span><span class="kw">plNested</span>(<span class="dt">fold =</span> <span class="dv">2</span>, <span class="dt">ctrlFS =</span> fs.outer, <span class="dt">ctrlGS =</span> gs.outer)</code></pre></div>
+</div>
+<div id="cross-validation-variants" class="section level2">
+<h2>Cross-validation variants</h2>
+<p>Typically, we summarize rounds of cross-validation using accuracy. However, we could conceive of situations where we might want to emphasize sensitivity over specificity (or <em>vice versa</em>). Below, we show how we can use <code>plNested</code> in lieu of <code>plCV</code> to select <code>plMonteCarlo</code> bootstraps based on sensitivity.</p>
+<p>In this example, each iteration of <code>plMonteCarlo</code> will split the dataset, then call <code>plNested</code> on the training subset. Next, <code>plNested</code> will manage <em>v</em>-fold cross-validation, splitting the data into <em>v</em> equal folds. Finally, each fold will undergo a grid-search according to <code>plGrid</code>. Since we have chosen to use <code>plNested</code> in lieu of <code>plCV</code>, we disable <code>plCV</code> by setting the <code>plGrid</code> argument <code>fold = NULL</code>. Note that, as above, we only perform feature selection within the <em>inner-layer</em>. This ensures that the <em>outer-layer</em> serves as a truly independent <em>validation set</em>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">fs.inner &lt;-<span class="st"> </span><span class="kw">ctrlFeatureSelect</span>(<span class="dt">func =</span> <span class="st">&quot;fsStats&quot;</span>, <span class="dt">top =</span> <span class="dv">0</span>, <span class="dt">how =</span> <span class="st">&quot;t.test&quot;</span>)
+gs.inner &lt;-<span class="st"> </span><span class="kw">ctrlGridSearch</span>(<span class="dt">func =</span> <span class="st">&quot;plGrid&quot;</span>, <span class="dt">top =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>), <span class="dt">how =</span> <span class="st">&quot;buildSVM&quot;</span>, <span class="dt">fold =</span> <span class="ot">NULL</span>)
+
+ss.outer &lt;-<span class="st"> </span><span class="kw">ctrlSplitSet</span>(<span class="dt">func =</span> <span class="st">&quot;splitStratify&quot;</span>, <span class="dt">percent.include =</span> <span class="dv">67</span>)
+fs.outer &lt;-<span class="st"> </span><span class="kw">ctrlFeatureSelect</span>(<span class="dt">func =</span> <span class="st">&quot;fsNULL&quot;</span>, <span class="dt">top =</span> <span class="dv">0</span>)
+gs.outer &lt;-<span class="st"> </span><span class="kw">ctrlGridSearch</span>(<span class="dt">func =</span> <span class="st">&quot;plNested&quot;</span>, <span class="dt">fold =</span> <span class="dv">10</span>, <span class="dt">ctrlFS =</span> fs.inner, <span class="dt">ctrlGS =</span> gs.inner)
+
+pl &lt;-<span class="st"> </span><span class="kw">data</span>(Golub_Merge) %&gt;%<span class="st"> </span>get %&gt;%
+<span class="st">  </span><span class="kw">arrayExprs</span>(<span class="dt">colBy =</span> <span class="st">&quot;ALL.AML&quot;</span>, <span class="dt">include =</span> <span class="kw">list</span>(<span class="st">&quot;ALL&quot;</span>, <span class="st">&quot;AML&quot;</span>)) %&gt;%
+<span class="st">  </span><span class="kw">modFilter</span>(<span class="dv">20</span>, <span class="dv">16000</span>, <span class="dv">500</span>, <span class="dv">5</span>) %&gt;%<span class="st"> </span>modTransform %&gt;%<span class="st"> </span>modNormalize %&gt;%
+<span class="st">  </span><span class="kw">plMonteCarlo</span>(<span class="dt">B =</span> <span class="dv">5</span>, <span class="dt">ctrlSS =</span> ss.outer, <span class="dt">ctrlFS =</span> fs.outer, <span class="dt">ctrlGS =</span> gs.outer)</code></pre></div>
+<p>The resultant object now contains the necessary information to rank <code>plMonteCarlo</code> bootstraps based on <em>v</em>-fold cross-validation sensitivity or specificity. Alternatively, we could aggregate the results by selecting the best fold from each bootstrap using <code>pipeFilter</code>, emphasizing sensitivity over specificity with <code>colBy</code>. Although neither of these options mirror <code>plCV</code> exactly, we hope future updates will offer more with respect to these kinds of analyses.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">top &lt;-<span class="st"> </span><span class="kw">pipeFilter</span>(pl, <span class="dt">colBy =</span> <span class="kw">c</span>(<span class="st">&quot;valid.sens&quot;</span>, <span class="st">&quot;valid.sens&quot;</span>, <span class="st">&quot;valid.spec&quot;</span>), <span class="dt">top =</span> <span class="dv">1</span>)</code></pre></div>
 </div>
 <div id="multi-class-classification" class="section level2">
 <h2>Multi-class classification</h2>
