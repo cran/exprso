@@ -2,20 +2,20 @@
 % Please edit documentation in R/1.1-classes.R, R/1.2-methods.R
 \docType{class}
 \name{ExprsArray-class}
-\alias{$,ExprsArray-method}
 \alias{ExprsArray-class}
-\alias{[,ExprsArray,ANY,ANY,ANY-method}
-\alias{[,ExprsArray-method}
-\alias{getFeatures,ExprsArray-method}
-\alias{plot,ExprsArray,missing-method}
 \alias{show,ExprsArray-method}
+\alias{[,ExprsArray,ANY,ANY-method}
+\alias{[,ExprsArray-method}
+\alias{$,ExprsArray-method}
 \alias{subset,ExprsArray-method}
+\alias{plot,ExprsArray,missing-method}
 \alias{summary,ExprsArray-method}
+\alias{getFeatures,ExprsArray-method}
 \title{An S4 class to store feature and annotation data}
 \usage{
 \S4method{show}{ExprsArray}(object)
 
-\S4method{[}{ExprsArray,ANY,ANY,ANY}(x, i, j)
+\S4method{[}{ExprsArray,ANY,ANY}(x, i, j)
 
 \S4method{$}{ExprsArray}(x, name)
 
@@ -62,12 +62,13 @@ An S4 class to store feature and annotation data
 
 \item \code{subset}: Method to subset \code{ExprsArray} object.
 
-\item \code{plot}: Method to quickly plot two or three dimensions of data.
+\item \code{plot}: Method to plot two or three dimensions of data.
 
 \item \code{summary}: Method to plot summary graphs for a sub-sample of feature data.
 
 \item \code{getFeatures}: Method to return features within an \code{ExprsArray} object.
 }}
+
 \section{Slots}{
 
 \describe{
@@ -79,6 +80,7 @@ An S4 class to store feature and annotation data
 
 \item{\code{reductionModel}}{Typically a list. Stores dimension reduction history.}
 }}
+
 \seealso{
 \code{\link{ExprsArray-class}}\cr
 \code{\link{ExprsModel-class}}\cr
@@ -86,4 +88,3 @@ An S4 class to store feature and annotation data
 \code{\link{ExprsEnsemble-class}}\cr
 \code{\link{ExprsPredict-class}}
 }
-

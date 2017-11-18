@@ -21,7 +21,7 @@ to indicate specific features by location, similar to a character vector.}
 
 \item{method}{A character string. The \code{ExprsBinary} method to execute multiple times.}
 
-\item{...}{Arguments passed to the respective wrapped function.}
+\item{...}{Arguments passed to the detailed function.}
 }
 \value{
 A list of the results given by \code{method}.
@@ -59,6 +59,7 @@ An \code{ExprsModule} object can only make predictions on
 \itemize{
 \item \code{ExprsMulti}: Method to execute multiple "1 vs. all" binary tasks.
 }}
+
 \seealso{
 \code{\link{fs}}\cr
 \code{\link{build}}\cr
@@ -70,4 +71,3 @@ An \code{ExprsModule} object can only make predictions on
 \code{\link{plMonteCarlo}}\cr
 \code{\link{plNested}}
 }
-

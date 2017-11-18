@@ -11,7 +11,7 @@
 #'  of v-folds to use during cross-validation. Set \code{fold = 0} to perform
 #'  leave-one-out cross-validation. This approach to cross-validation
 #'  will work for \code{ExprsBinary} and \code{ExprsMulti} objects alike. The
-#'  peformance metric used to measure cross-validation accuracy is the
+#'  performance metric used to measure cross-validation accuracy is the
 #'  \code{acc} slot returned by \code{\link{calcStats}}.
 #'
 #' This type of cross-validation is most appropriate if the \code{ExprsArray}
@@ -26,7 +26,7 @@
 #'  function forces \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
 #'
 #' @param array Specifies the \code{ExprsArray} object to undergo cross-validation.
-#' @inheritParams fs
+#' @inheritParams fs.
 #' @param how A character string. Specifies the \code{\link{build}} method to iterate.
 #' @param fold A numeric scalar. Specifies the number of folds for cross-validation.
 #'  Set \code{fold = 0} to perform leave-one-out cross-validation.

@@ -1,6 +1,3 @@
-###########################################################
-### ExprsArray class
-
 #' An S4 class to store feature and annotation data
 #'
 #' @slot exprs A matrix. Stores the feature data.
@@ -26,7 +23,7 @@ setClass("ExprsArray",
 
 #' An S4 class to store feature and annotation data
 #'
-#' An \code{ExprsArray} sub-class for data with binary class labels.
+#' An \code{ExprsArray} sub-class for data with binary class outcomes.
 #'
 #' @export
 setClass("ExprsBinary",
@@ -35,15 +32,21 @@ setClass("ExprsBinary",
 
 #' An S4 class to store feature and annotation data
 #'
-#' An \code{ExprsArray} sub-class for data with many class labels.
+#' An \code{ExprsArray} sub-class for data with multiple class outcomes.
 #'
 #' @export
 setClass("ExprsMulti",
          contains = "ExprsArray"
 )
 
-###########################################################
-### ExprsModel class
+#' An S4 class to store feature and annotation data
+#'
+#' An \code{ExprsArray} sub-class for data with continuous outcomes.
+#'
+#' @export
+setClass("ExprsCont",
+         contains = "ExprsArray"
+)
 
 #' An S4 class to store the classification model
 #'
@@ -84,9 +87,6 @@ setClass("ExprsModule",
          contains = "ExprsModel"
 )
 
-###########################################################
-### ExprsPipeline class
-
 #' An S4 class to store models built during high-throughput learning
 #'
 #' @slot summary Typically a data.frame. Stores the parameters and
@@ -107,13 +107,9 @@ setClass("ExprsPipeline",
            machs = "ANY")
 )
 
-###########################################################
-### ExprsEnsemble class
-
 #' An S4 class to store multiple classification models
 #'
-#' @slot machs Typically a list. Stores the classification models
-#'  referenced in \code{summary} slot.
+#' @slot machs Typically a list. Stores the classification models.
 #'
 #' @seealso
 #' \code{\link{ExprsArray-class}}\cr
@@ -127,9 +123,6 @@ setClass("ExprsEnsemble",
            machs = "ANY"
          )
 )
-
-###########################################################
-### ExprsPredict class
 
 #' An S4 class to store class predictions
 #'

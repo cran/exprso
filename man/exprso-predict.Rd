@@ -3,9 +3,9 @@
 \docType{methods}
 \name{exprso-predict}
 \alias{exprso-predict}
-\alias{predict,ExprsEnsemble-method}
 \alias{predict,ExprsMachine-method}
 \alias{predict,ExprsModule-method}
+\alias{predict,ExprsEnsemble-method}
 \title{Predict Class Labels}
 \usage{
 \S4method{predict}{ExprsMachine}(object, array, verbose = TRUE)
@@ -59,7 +59,7 @@ For an \code{ExprsEnsemble}:
 
 At the moment, \code{ExprsEnsemble} can only make predictions
  using \code{ExprsMachine} objects. Therefore, it can only predict
- against \code{ExprsBinary} objets. Predicting with ensembles poses
+ against \code{ExprsBinary} objects. Predicting with ensembles poses
  a unique challenge with regard to how to translate multiple
  performance scores (one for each classifier in the ensemble) into
  a single performance score (for the ensemble as a whole). For now,
@@ -82,4 +82,3 @@ When \code{how = "probability"}, this method will take the average
 \seealso{
 \code{\link{modHistory}}, \code{\link{calcStats}}
 }
-

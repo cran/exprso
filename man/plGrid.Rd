@@ -55,7 +55,7 @@ Trains and deploys multiple classifiers across a vast parameter search space.
  of v-folds to use during cross-validation. Set \code{fold = 0} to perform
  leave-one-out cross-validation. This approach to cross-validation
  will work for \code{ExprsBinary} and \code{ExprsMulti} objects alike. The
- peformance metric used to measure cross-validation accuracy is the
+ performance metric used to measure cross-validation accuracy is the
  \code{acc} slot returned by \code{\link{calcStats}}. Set \code{fold = NULL}
  to skip cross-validation altogether.
 
@@ -92,4 +92,3 @@ pl <- plGrid(array.train, array.valid = arrays[[2]], how = "buildSVM",
 \code{\link{plMonteCarlo}}\cr
 \code{\link{plNested}}
 }
-
