@@ -12,7 +12,7 @@
 
 <meta name="author" content="Thomas Quinn" />
 
-<meta name="date" content="2017-11-18" />
+<meta name="date" content="2017-12-01" />
 
 <title>An Introduction to the exprso Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">An Introduction to the exprso Package</h1>
 <h4 class="author"><em>Thomas Quinn</em></h4>
-<h4 class="date"><em>2017-11-18</em></h4>
+<h4 class="date"><em>2017-12-01</em></h4>
 
 
 
@@ -110,15 +110,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Importing data</h2>
 <p>We recommend importing data using the <code>exprso</code> function. This function has two arguments. The first expects the data with samples as rows and features as columns. The second expects the annotations with samples as rows where the first column contains the outcome to predict.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
-array &lt;-<span class="st"> </span><span class="kw">exprso</span>(iris[<span class="dv">1</span>:<span class="dv">80</span>, <span class="dv">1</span>:<span class="dv">4</span>], iris[<span class="dv">1</span>:<span class="dv">80</span>, <span class="dv">5</span>])</code></pre></div>
+array &lt;-<span class="st"> </span><span class="kw">exprso</span>(iris[<span class="dv">1</span><span class="op">:</span><span class="dv">80</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>], iris[<span class="dv">1</span><span class="op">:</span><span class="dv">80</span>, <span class="dv">5</span>])</code></pre></div>
 <pre><code>## [1] &quot;Preparing data for binary classification.&quot;</code></pre>
 </div>
 <div id="subsetting-data" class="section level2">
 <h2>Subsetting data</h2>
 <p>To subset an <code>ExprsArray</code> object, we provide methods for the <code>[</code> and <code>$</code> operators that access the <code>@annot</code> annotations slot directly. Alternatively, one could use the <code>modSubset</code> or <code>subset</code> functions. Note that the “defineCase” column always contains the outcome to predict. For binary classification, this is always coded as “Case” and “Control”.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>array[array$defineCase ==<span class="st"> &quot;Case&quot;</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>array[array<span class="op">$</span>defineCase <span class="op">==</span><span class="st"> &quot;Case&quot;</span>, ]
 sub &lt;-<span class="st"> </span><span class="kw">modSubset</span>(array, <span class="dt">colBy =</span> <span class="st">&quot;defineCase&quot;</span>, <span class="dt">include =</span> <span class="st">&quot;Case&quot;</span>)
-sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span class="dt">subset =</span> array$defineCase ==<span class="st"> &quot;Case&quot;</span>)</code></pre></div>
+sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span class="dt">subset =</span> array<span class="op">$</span>defineCase <span class="op">==</span><span class="st"> &quot;Case&quot;</span>)</code></pre></div>
 </div>
 <div id="splitting-data" class="section level2">
 <h2>Splitting data</h2>
@@ -160,7 +160,7 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
 </div>
 <div id="selecting-features" class="section level2">
 <h2>Selecting features</h2>
-<p>Considering the high-dimensionality of many genomic datasets, it is prudent and often necessary to prioritize which features to include during classifier construction. This package provides functions for some of the most frequently used feature selection methods. Each function works as a self-contained wrapper that (1) pre-processes the <code>ExprsArray</code> input, (2) performs the feature selection, and (3) returns an <code>ExprsArray</code> output with an updated feature selection history. These histories get passed along at every step of the way until they eventually get used to pre-process an unlabeled dataset during classifier deployment (i.e., prediction).</p>
+<p>Considering the high-dimensionality of many datasets, it is prudent and often necessary to prioritize which features to include during classifier construction. This package provides functions for some of the most frequently used feature selection methods. Each function works as a self-contained wrapper that (1) pre-processes the <code>ExprsArray</code> input, (2) performs the feature selection, and (3) returns an <code>ExprsArray</code> output with an updated feature selection history. These histories get passed along at every step of the way until they eventually get used to pre-process an unlabeled dataset during classifier deployment (i.e., prediction).</p>
 <p>One feature selection function is <code>fsStats</code>. This performs basic feature selection based on simple statistical tests. Specifically, this function will rank features using either the Student’s <span class="math inline">\(t\)</span>-test or the Kolmogorov-Smirnov test. Below, the argument <code>top = 0</code> tells tells the program to rank all features.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">array.train &lt;-
 <span class="st">  </span><span class="kw">fsStats</span>(array.train, <span class="dt">top =</span> <span class="dv">0</span>, <span class="dt">how =</span> <span class="st">&quot;t.test&quot;</span>)</code></pre></div>
@@ -227,13 +227,13 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
          <span class="dt">how =</span> <span class="st">&quot;buildSVM&quot;</span>,
          <span class="dt">fold =</span> <span class="dv">0</span>,
          <span class="dt">kernel =</span> <span class="st">&quot;linear&quot;</span>,
-         <span class="dt">cost =</span> <span class="dv">10</span>^(-<span class="dv">3</span>:<span class="dv">3</span>)
+         <span class="dt">cost =</span> <span class="dv">10</span><span class="op">^</span>(<span class="op">-</span><span class="dv">3</span><span class="op">:</span><span class="dv">3</span>)
 )</code></pre></div>
 <p>The returned object contains two slots, <code>@summary</code> and <code>@machs</code>, which store the performance summary and corresponding <code>ExprsModel</code> objects, respectively. The performance summary contains columns detailing the parameters used to build each machine along with performance metrics for the training set (and test set, if provided). Columns named with “train” describe training set performances. Columns named with “valid” describe test set performances. The column, <code>&quot;train.plCV&quot;</code>, contains the cross-validation accuracy, if performed. The returned <code>ExprsPipeline</code> object also contains an <code>ExprsModel</code> object for each entry in the performance summary.</p>
 <p>To subset an <code>ExprsPipeline</code> object, we provide methods for the <code>[</code> and <code>$</code> operators that access the <code>@summary</code> performance summary slot directly. Alternatively, one could use the <code>pipeSubset</code> or <code>subset</code> functions.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>gs[gs$cost ==<span class="st"> </span><span class="dv">1</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>gs[gs<span class="op">$</span>cost <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, ]
 sub &lt;-<span class="st"> </span><span class="kw">pipeSubset</span>(gs, <span class="dt">colBy =</span> <span class="st">&quot;cost&quot;</span>, <span class="dt">include =</span> <span class="dv">1</span>)
-sub &lt;-<span class="st"> </span><span class="kw">subset</span>(gs, <span class="dt">subset =</span> gs$cost ==<span class="st"> </span><span class="dv">1</span>)</code></pre></div>
+sub &lt;-<span class="st"> </span><span class="kw">subset</span>(gs, <span class="dt">subset =</span> gs<span class="op">$</span>cost <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</code></pre></div>
 </div>
 <div id="other-cross-validation" class="section level2">
 <h2>Other cross-validation</h2>
@@ -250,7 +250,7 @@ gs &lt;-
                  <span class="dt">how =</span> <span class="st">&quot;buildSVM&quot;</span>,
                  <span class="dt">top =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>),
                  <span class="dt">kernel =</span> <span class="st">&quot;linear&quot;</span>,
-                 <span class="dt">cost =</span> <span class="dv">10</span>^(-<span class="dv">3</span>:<span class="dv">3</span>),
+                 <span class="dt">cost =</span> <span class="dv">10</span><span class="op">^</span>(<span class="op">-</span><span class="dv">3</span><span class="op">:</span><span class="dv">3</span>),
                  <span class="dt">fold =</span> <span class="dv">10</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">boot &lt;-
 <span class="st">  </span><span class="kw">plMonteCarlo</span>(arrays[[<span class="dv">1</span>]],
@@ -260,12 +260,7 @@ gs &lt;-
                <span class="dt">ctrlGS =</span> gs)</code></pre></div>
 <p>Next, we reduce the results of <code>plMonteCarlo</code> to a single performance metric by feeding the returned <code>ExprsPipeline</code> object through <code>calcMonteCarlo</code>. Note that this helper function will fail unless <code>plGrid</code> has called <code>plCV</code> during the parameter grid-search.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">calcMonteCarlo</span>(boot, <span class="dt">colBy =</span> <span class="st">&quot;valid.auc&quot;</span>)</code></pre></div>
-<pre><code>## Retrieving best accuracy for boot 1 ...
-## Retrieving best accuracy for boot 2 ...
-## Retrieving best accuracy for boot 3 ...
-## Retrieving best accuracy for boot 4 ...
-## Retrieving best accuracy for boot 5 ...
-## Averaging best accuracies across all boots...</code></pre>
+<pre><code>## Averaging best accuracies across all boots...</code></pre>
 <pre><code>## [1] 1</code></pre>
 </div>
 <div id="ensemble-classifiers" class="section level2">
@@ -286,9 +281,13 @@ pred &lt;-<span class="st"> </span><span class="kw">predict</span>(ens, array.te
 ## 1   1    1    1</code></pre>
 <p>Owing to how the <code>pipeFilter</code> function handles <code>ExprsPipeline</code> objects that contain a “boot” column in the performance summary (i.e., <code>@summary</code>), we include the <code>pipeUnboot</code> function to rename this “boot” column to “unboot”. To learn more about how <code>ExprsEnsemble</code> predicts class labels, we refer the user to the documentation, <code>?'exprso-predict'</code>. In addition, we encourage the user to visit the documentation, <code>?'ExprsPipeline-class'</code> and <code>?'ExprsEnsemble-class'</code>.</p>
 </div>
-<div id="multi-class-methods" class="section level2">
-<h2>Multi-class methods</h2>
+<div id="multi-class-classification-methods" class="section level2">
+<h2>Multi-class classification methods</h2>
 <p>We conclude this vignette by alerting the user that the exprso package also includes a framework for performing multi-class classification in an automated manner. These methods use the “1-vs-all” approach to multi-class classification, whereby each individual class label has a turn getting treated as the positive class label in a dichotomous (binary) scheme. Then, the results of each iteration get integrated into a single construct. To learn more about multi-class classification, we refer the user to the documentation for <code>?doMulti</code> and the companion vignette, “Advanced Topics for the exprso package”.</p>
+</div>
+<div id="regression-methods" class="section level2">
+<h2>Regression methods</h2>
+<p>The exprso package framework also extends to building and deploying regression models to predict continuous outcomes. All pipeline and ensemble methods discussed here also apply to regression, although some <code>fs</code> and <code>build</code> methods work only for classification.</p>
 </div>
 <div id="final-remarks" class="section level2">
 <h2>Final remarks</h2>

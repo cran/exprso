@@ -7,7 +7,7 @@
 fsInclude(object, top = 0, include)
 }
 \arguments{
-\item{object}{Specifies the \code{ExprsArray} object to undergo feature selection.}
+\item{object}{An \code{ExprsArray} object to undergo feature selection.}
 
 \item{top}{A numeric scalar or character vector. A numeric scalar indicates
 the number of top features that should undergo feature selection. A character vector
@@ -23,4 +23,5 @@ Returns an \code{ExprsArray} object.
 }
 \description{
 \code{fsInclude} selects features passed to the \code{include} argument.
+ Ranks features by the provided order.
 }

@@ -4,16 +4,18 @@
 \alias{fsPropd}
 \title{Select Features by Differential Proportionality Analysis}
 \usage{
-fsPropd(object, top = 0)
+fsPropd(object, top = 0, ...)
 }
 \arguments{
-\item{object}{Specifies the \code{ExprsArray} object to undergo feature selection.}
+\item{object}{An \code{ExprsArray} object to undergo feature selection.}
 
 \item{top}{A numeric scalar or character vector. A numeric scalar indicates
 the number of top features that should undergo feature selection. A character vector
 indicates specifically which features by name should undergo feature selection.
 Set \code{top = 0} to include all features. A numeric vector can also be used
 to indicate specific features by location, similar to a character vector.}
+
+\item{...}{Arguments passed to the detailed function.}
 }
 \value{
 Returns an \code{ExprsArray} object.

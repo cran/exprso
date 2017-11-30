@@ -144,12 +144,10 @@ pl <- trainingSet(splitSets) %>%
   plNested(fold = 2, ctrlFS = fs, ctrlGS = gs) %T>%
   calcNested(colBy = "valid.acc")
 
-## ---- eval = FALSE-------------------------------------------------------
-#  testthat::expect_error(
-#    pl %>% buildEnsemble %>%
-#      predict(testSet(splitSets)) %>%
-#      calcStats
-#  )
+## ---- results = "hide"---------------------------------------------------
+pl %>% buildEnsemble %>%
+  predict(testSet(splitSets)) %>%
+  calcStats
 
 ## ---- results = "hide"---------------------------------------------------
 fs <- ctrlFeatureSelect(func = "fsStats", top = 0, how = "t.test")

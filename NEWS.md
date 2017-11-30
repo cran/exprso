@@ -1,3 +1,71 @@
+## exprso 0.2.6
+---------------------
+* General changes
+    * New `show` method for `RegrsArray` objects
+    * New `show` method for `RegrsModel` objects
+    * New `show` method for `RegrsPredict` objects
+    * Review all documentation
+
+## exprso 0.2.5
+---------------------
+* General changes
+    * Validate performance of regression `pl` pipelines
+    * Users can now deploy multi-class classifier ensembles
+    * Users can now deploy regression ensembles
+    * Trim documentation
+
+## exprso 0.2.4
+---------------------
+* General changes
+    * Move `modHistory` into script with other mod modules
+    * Move `predict` and `calcStats` into separate files
+* Revise split modules
+    * Make `splitSample` work with `RegrsArray` objects
+    * Note `splitStratify` is classification only
+* Revise build modules
+    * Fix bug when making `RegrsModel` objects
+    * Note `buildLDA` is classification only
+    * Note `buildNB` is classification only
+* Revise predict
+    * New predict method for `RegrsModel` objects
+    * New calcStats method for `RegrsPredict` objects
+    * Trim documentation
+
+## exprso 0.2.3
+---------------------
+* Revise build modules
+    * All build wrapper functions now support continuous outcomes
+* Revise pl modules
+    * New `ctrlModSet` function to handle pre-process arguments
+    * Let `plMonteCarlo` apply pre-process at each bootstrap
+
+## exprso 0.2.2
+---------------------
+* General changes
+    * Have `exprso` throw error if passed boolean outcomes
+    * Add new `RegrsPredict` class with two slots
+* Revise pre-filter modules
+    * New `modAcomp` makes all sample vectors have same total sum
+    * New `modCLR` applies centered log-ratio transformation
+* Revise fs modules
+    * Pass additional arguments to `fsPropd` function
+    * Make `fsStats` run a bit faster
+* Revise build modules
+    * Add `RegrsModel` support to `build.` constructor
+* Revise pl modules
+    * Add default argument to `calcMonteCarlo`
+    * Add default argument to `calcNested`
+
+## exprso 0.2.1
+---------------------
+* General changes
+    * Fix NOTE associated with `magrittr` import
+    * Revise `?fs` and `?build` help files
+    * Rename `ExprsCont` class to `RegrsArray`
+    * New `RegrsModel` class
+* Revise fs modules
+    * New `fsCor` function ranks features for `RegrsArray` objects
+
 ## exprso 0.2.0
 ---------------------
 * General changes

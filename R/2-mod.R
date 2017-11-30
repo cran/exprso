@@ -1,3 +1,48 @@
+#' Replicate Data Process History
+#'
+#' \code{modHistory} replicates the \code{fs} history of a reference object.
+#'  Used by \code{predict} to prepare validation set for model deployment.
+#'
+#' @param object An \code{ExprsArray} object. The object that should undergo a
+#'  replication of some feature selection and dimension reduction history.
+#' @param reference An \code{ExprsArray} or \code{ExprsModel} object. The object
+#'  containing the history to use as a template.
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modHistory <- function(object, reference){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  if(!is.null(object@preFilter)){
+    if(length(reference@preFilter) <= length(object@preFilter)){
+      stop("The object has more history than the provided reference.") }
+    if(!identical(object@preFilter, reference@preFilter[1:length(object@preFilter)])){
+      stop("The object history does not match the reference history.") }
+  }
+
+  # Duplicate starting with first non-overlapping history
+  index <- length(object@reductionModel) + 1
+  for(i in index:length(reference@reductionModel)){
+
+    if(any(is.na(reference@reductionModel[[i]]))){ # apply fs only
+      exprs.i <- object@exprs[reference@preFilter[[i]], , drop = FALSE]
+    }else{ # apply fs and dimension reduction
+      data <- data.frame(t(object@exprs[reference@preFilter[[i]], , drop = FALSE]))
+      if("prcomp" %in% class(reference@reductionModel[[i]])){
+        exprs.i <- t(predict(reference@reductionModel[[i]], data))
+      }else{ stop("Reduction model class not recognized.") }
+    }
+
+    object <- new(class(object), exprs = exprs.i, annot = object@annot,
+                  preFilter = append(object@preFilter, list(reference@preFilter[[i]])),
+                  reductionModel = append(object@reductionModel,
+                                          list(reference@reductionModel[[i]])))
+  }
+
+  return(object)
+}
+
 #' Hard Filter Data
 #'
 #' \code{modFilter} imposes a hard filter for (gene expression) feature data.
@@ -103,5 +148,38 @@ modTMM <- function(object, method = "TMM"){
 
   f <- edgeR::calcNormFactors(object@exprs, method = method)
   object@exprs <- t(t(object@exprs) * f)
+  return(object)
+}
+
+#' Compositionally Constrain Data
+#'
+#' \code{modAcomp} makes it so that all sample vectors have the same total sum.
+#'
+#' @inheritParams modFilter
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modAcomp <- function(object){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  object@exprs <- apply(object@exprs, 2, function(x) x / sum(x))
+  return(object)
+}
+
+#' Log-ratio Transform Data
+#'
+#' \code{modCLR} applies a centered log-ratio transformation to the data.
+#'
+#' @inheritParams modFilter
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modCLR <- function(object){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  logX <- log(object@exprs)
+  object@exprs <- apply(logX, 2, function(x) x / mean(x))
   return(object)
 }

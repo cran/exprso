@@ -35,16 +35,13 @@
 #' @examples
 #' \dontrun{
 #' library(exprso)
-#' library(golubEsets)
-#' data(Golub_Merge)
-#' array <- arrayEset(Golub_Merge, colBy = "ALL.AML", include = list("ALL", "AML"))
-#' array <- modFilter(array, 20, 16000, 500, 5) # pre-filter Golub ala Deb 2003
-#' array <- modTransform(array) # lg transform
-#' array <- modNormalize(array, c(1, 2)) # normalize gene and subject vectors
+#' data(iris)
+#' array <- exprso(iris[,1:4], iris[,5])
 #' arrays <- splitSample(array, percent.include = 67)
-#' array.train <- fsStats(arrays[[1]], top = 0, how = "t.test")
-#' array.train <- fsPrcomp(array.train, top = 50)
+#' array.train <- fsANOVA(arrays[[1]], top = 0)
+#' array.train <- fsPrcomp(array.train, top = 3)
 #' mach <- buildSVM(array.train, top = 5, kernel = "linear", cost = 1)
+#' predict(mach, arrays[[2]])
 #' }
 #' @export
 exprso <- function(x, y){
@@ -63,6 +60,7 @@ exprso <- function(x, y){
   labels <- array@annot[,1]
 
   # Set sub-class to guide fs and build modules
+  if(class(labels) == "logical") stop("Boolean outcomes not supported.")
   if(class(labels) == "character" | class(labels) == "factor"){
     if(length(unique(y)) == 2){
       print("Preparing data for binary classification.")
@@ -75,7 +73,7 @@ exprso <- function(x, y){
     }
   }else{
     print("Preparing data for regression.")
-    class(array) <- "ExprsCont"
+    class(array) <- "RegrsArray"
     array@annot$defineCase <- labels
   }
 
@@ -97,6 +95,8 @@ exprso <- function(x, y){
 #' @description
 #' The \code{exprso} package includes these data process modules:
 #'
+#' - \code{\link{modHistory}}
+#'
 #' - \code{\link{modSubset}}
 #'
 #' - \code{\link{modFilter}}
@@ -106,6 +106,10 @@ exprso <- function(x, y){
 #' - \code{\link{modNormalize}}
 #'
 #' - \code{\link{modTMM}}
+#'
+#' - \code{\link{modAcomp}}
+#'
+#' - \code{\link{modCLR}}
 NULL
 
 #' @name split
@@ -139,6 +143,8 @@ NULL
 #'
 #' - \code{\link{fsStats}}
 #'
+#' - \code{\link{fsCor}}
+#'
 #' - \code{\link{fsPrcomp}}
 #'
 #' - \code{\link{fsEbayes}}
@@ -150,30 +156,22 @@ NULL
 #' - \code{\link{fsPropd}}
 #'
 #' @details
-#' Considering the high-dimensionality of most genomic datasets, it is prudent and often necessary
-#'  to prioritize which features to include during classifier construction. Although there exists
-#'  many feature selection methods, this package provides wrappers for some of the most popular ones.
-#'  Each wrapper (1) pre-processes the \code{ExprsArray} input, (2) performs the feature selection,
-#'  and (3) returns an \code{ExprsArray} output with an updated feature selection history.
-#'  You can use, in tandem, any number of feature selection methods, and in any order.
+#' Considering the high-dimensionality of many datasets, it is prudent and
+#'  often necessary to prioritize which features to include during model
+#'  construction. This package provides functions for some of the most frequently
+#'  used feature selection methods. Each function works as a self-contained wrapper
+#'  that (1) pre-processes the \code{ExprsArray} input, (2) performs the feature
+#'  selection, and (3) returns an \code{ExprsArray} output with an updated feature
+#'  selection history. These histories get passed along at every step of the way
+#'  until they eventually get used to pre-process an unlabeled dataset during
+#'  model deployment (i.e., prediction).
 #'
-#' For all feature selection methods, \code{@@preFilter} and \code{@@reductionModel} stores the
-#'  feature selection and dimension reduction history, respectively. This history gets passed
-#'  along to prepare the test or validation set during model deployment, ensuring that these
-#'  sets undergo the same feature selection and dimension reduction as the training set.
-#'
-#' Under the scenarios where users plan to apply multiple feature selection or dimension
-#'  reduction steps, the \code{top} argument manages which features (e.g., gene expression values)
-#'  to send through each feature selection or dimension reduction procedure. For \code{top},
-#'  a numeric scalar indicates the number of top features to use, while a character vector
-#'  indicates specifically which features to use. In this way, the user sets which features
-#'  to feed INTO the \code{fs} method (NOT which features the user expects OUT). The example
-#'  below shows how to apply dimension reduction to the top 50 features as selected by the
-#'  Student's t-test. Set \code{top = 0} to pass all features through an \code{fs} method.
-#'
-#' Note that not all feature selection methods will generalize to multi-class data.
-#'  A feature selection method will fail when applied to an \code{ExprsMulti} object
-#'  unless that feature selection method has an \code{ExprsMulti} method.
+#' The argument \code{top} specifies either the names or the number of features
+#'  to supply TO the feature selection method, not what the user intends to
+#'  retrieve FROM the feature selection method. When calling the first feature
+#'  selection method (or the first build method, if skipping feature selection),
+#'  a numeric \code{top} argument will select a "top ranked" feature set according
+#'  to their default order in the \code{ExprsArray} input.
 NULL
 
 #' @name build
@@ -197,26 +195,21 @@ NULL
 #' - \code{\link{buildDNN}}
 #'
 #' @details
-#' These \code{build} methods construct a single classifier given an \code{ExprsArray}
-#'  object and a set of parameters. This function returns an \code{ExprsModel} object.
-#'  In the case of binary classification, these methods use an \code{ExprsBinary}
-#'  object and return an \code{ExprsMachine} object. In the case of multi-class
-#'  classification, these methods use an \code{ExprsMulti} object and return an
-#'  \code{ExprsModule} object. In the case of multi-class classification, these methods
+#' In the case of multi-class classification, each \code{build} module can
 #'  harness the \code{\link{doMulti}} function to perform "1 vs. all" classifier
 #'  construction. In the setting of four class labels, a single \code{build} call
 #'  will return four classifiers that work in concert to make a single prediction
 #'  of an unlabelled subject. For building multiple classifiers across a vast
-#'  parameter space in a high-throughput manner, see \code{pl} methods.
+#'  parameter space in a high-throughput manner, see \code{\link{pl}}.
 #'
 #' Like \code{\link{fs}} methods, \code{build} methods have a \code{top} argument
-#'  which allows the user to specify which features to feed INTO the classifier
+#'  which allows the user to specify which features to feed INTO the model
 #'  build. This effectively provides the user with one last opportunity to subset
 #'  the feature space based on prior feature selection or dimension reduction.
 #'  For all build methods, \code{@@preFilter} and \code{@@reductionModel} will
 #'  get passed along to the resultant \code{ExprsModel} object, again ensuring
 #'  that any test or validation sets will undergo the same feature selection and
-#'  dimension reduction in the appropriate steps when deploying the classifier.
+#'  dimension reduction in the appropriate steps when deploying the model.
 #'  Set \code{top = 0} to pass all features through a \code{build} method.
 NULL
 

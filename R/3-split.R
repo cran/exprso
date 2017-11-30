@@ -7,8 +7,7 @@
 #'  contain at least one subject for each class label. If this method finds no solution
 #'  after 10 iterations, the function will post an error. Set \code{percent.include = 100}
 #'  to skip random sampling and return a \code{NULL} validation set. Additional arguments
-#'  (e.g., \code{replace = TRUE}) passed along to \code{\link{sample}}. This method works well
-#'  for all (i.e., binary and multi-class) \code{ExprsArray} objects.
+#'  (e.g., \code{replace = TRUE}) passed along to \code{\link{sample}}.
 #'
 #' @param object An \code{ExprsArray} object to split.
 #' @param percent.include Specifies the percent of the total number
@@ -48,8 +47,12 @@ splitSample <- function(object, percent.include = 67, ...){
     if(counter > 10) stop("splitSample could not find a solution. Check the supplied parameters.")
     random.train <- sample(1:ncol(object@exprs), size = size, ...)
     random.valid <- setdiff(1:ncol(object@exprs), random.train)
-    if(all(unique(object$defineCase) %in% object$defineCase[random.train]) &
-       all(unique(object$defineCase) %in% object$defineCase[random.valid])) all.in <- TRUE
+    if(class(object) == "RegrsArray"){
+      all.in <- TRUE
+    }else{
+      if(all(unique(object$defineCase) %in% object$defineCase[random.train]) &
+         all(unique(object$defineCase) %in% object$defineCase[random.valid])) all.in <- TRUE
+    }
   }
 
   return(list(
@@ -88,8 +91,8 @@ splitStratify <- function(object, percent.include = 67, colBy = NULL,
                           breaks = rep(list(NA), length(colBy)),
                           ...){
 
-  classCheck(object, "ExprsArray",
-             "This function is applied to the results of ?exprso.")
+  classCheck(object, c("ExprsBinary", "ExprsMulti"),
+             "This feature selection method only works for classification tasks.")
 
   if(percent.include < 1 | percent.include > 100){
     stop("Uh oh! Use an inclusion percentage between 1-100!")

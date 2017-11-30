@@ -1,50 +1,3 @@
-###########################################################
-### Nested cross-validation argument check
-
-#' Check \code{ctrlGS} Arguments
-#'
-#' This function ensures that the list of arguments for \code{ctrlGS} meets
-#'  the criteria required by the \code{\link{plNested}} function.
-#'
-#' When calculating classifier performance with \code{\link{calcStats}}, this
-#'  function forces \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
-#'
-#' @param args A list of arguments to check.
-check.ctrlGS <- function(args){
-
-  if(args$func == "plGrid" | args$func == "plGridMulti"){
-
-    if(!"aucSkip" %in% names(args)){
-
-      cat("Setting 'aucSkip' to TRUE (default behavior, override explicitly)...\n")
-      args <- append(args, list("aucSkip" = TRUE))
-    }
-
-    if(!args$aucSkip){
-
-      cat("Uh oh! This function requires TRUE 'aucSkip'. Setting 'aucSkip' to TRUE...\n")
-      args$aucSkip <- TRUE
-    }
-
-    if(!"plotSkip" %in% names(args)){
-
-      cat("Setting 'plotSkip' to TRUE (default behavior, override explicitly)...\n")
-      args <- append(args, list("plotSkip" = TRUE))
-    }
-
-    if(!args$plotSkip){
-
-      cat("Uh oh! This function requires TRUE 'plotSkip'. Setting 'plotSkip' to TRUE...\n")
-      args$plotSkip <- TRUE
-    }
-  }
-
-  return(args)
-}
-
-###########################################################
-### Nested cross-validation
-
 #' Nested Cross-Validation
 #'
 #' Perform nested cross-validation.
@@ -66,11 +19,10 @@ check.ctrlGS <- function(args){
 #'  you can feed the returned \code{ExprsPipeline} object through the helper
 #'  function \code{\link{calcNested}}.
 #'
-#' When calculating classifier performance with \code{\link{calcStats}}, this
+#' When calculating model performance with \code{\link{calcStats}}, this
 #'  function forces \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
-#'
-#' When embedding another \code{plMonteCarlo} or \code{plNested} call within
-#'  this function (i.e., via \code{ctrlGS}), outer-fold classifier performance
+#'  When embedding another \code{plMonteCarlo} or \code{plNested} call within
+#'  this function (i.e., via \code{ctrlGS}), outer-fold model performance
 #'  will force \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
 #'
 #' @param array Specifies the \code{ExprsArray} object to undergo cross-validation.
@@ -79,19 +31,7 @@ check.ctrlGS <- function(args){
 #' @param ctrlFS A list of arguments handled by \code{\link{ctrlFeatureSelect}}.
 #' @param ctrlGS Arguments handled by \code{\link{ctrlGridSearch}}.
 #' @param save A logical scalar. Toggles whether to save each fold.
-#'
 #' @return An \code{\link{ExprsPipeline-class}} object.
-#'
-#' @seealso
-#' \code{\link{fs}}\cr
-#' \code{\link{build}}\cr
-#' \code{\link{doMulti}}\cr
-#' \code{\link{exprso-predict}}\cr
-#' \code{\link{plCV}}\cr
-#' \code{\link{plGrid}}\cr
-#' \code{\link{plGridMulti}}\cr
-#' \code{\link{plMonteCarlo}}\cr
-#' \code{\link{plNested}}
 #'
 #' @examples
 #' \dontrun{
@@ -223,46 +163,28 @@ plNested <- function(array, fold = 10, ctrlFS, ctrlGS, save = FALSE){
 #'
 #' @param pl Specifies the \code{ExprsPipeline} object returned by \code{plNested}.
 #' @param colBy A character vector or string. Specifies column(s) to use when
-#'  summarizing classifier performance. Listing multiple columns will calculate
+#'  summarizing model performance. Listing multiple columns will calculate
 #'  performance as a product of those listed performances.
 #' @return A numeric scalar. The cross-validation accuracy.
 #'
 #' @export
-calcNested <- function(pl, colBy){
+calcNested <- function(pl, colBy = "valid.acc"){
 
-  if(missing(colBy)) stop("Uh oh! Missing 'colBy' argument.")
+  if(!"v" %in% colnames(pl@summary) | !"train.plCV" %in% colnames(pl@summary)){
+    stop("Summary must have 'v' and 'train.plCV' columns.")
+  }
 
-  if("v" %in% colnames(pl@summary)){
+  acc <- vector("numeric", length(unique(pl@summary$v)))
+  for(b in 1:length(unique(pl@summary$v))){
 
-    if("train.plCV" %in% colnames(pl@summary)){
+    # Subset only fold 'b'
+    fold <- pl@summary[pl@summary$v == b, ]
 
-      # Prepare container to store validation accuracy
-      acc <- vector("numeric", length(unique(pl@summary$v)))
+    # Select best model based on cross-validation accuracy
+    best <- fold[which.max(fold$train.plCV), ]
 
-      for(b in 1:length(unique(pl@summary$v))){
-
-        cat("Retrieving best accuracy for fold", b, "...\n")
-
-        # Subset only fold 'b'
-        fold <- pl@summary[pl@summary$v == b, ]
-
-        # Select best model based on cross-validation accuracy
-        best <- fold[which.max(fold$train.plCV), ]
-
-        # Save validation accuracy as colBy product
-        acc[b] <- apply(best[colBy], MARGIN = 1, prod)
-      }
-
-    }else{
-
-      stop("Uh oh! Supplied data not in expected format. ",
-           "Cannot calculate this cross-validation accuracy.")
-    }
-
-  }else{
-
-    stop("Uh oh! Supplied data not in expected format. ",
-         "Cannot calculate this cross-validation accuracy.")
+    # Save validation accuracy as colBy product
+    acc[b] <- apply(best[colBy], MARGIN = 1, prod)
   }
 
   # Return average validation accuracy

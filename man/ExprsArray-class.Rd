@@ -86,5 +86,6 @@ An S4 class to store feature and annotation data
 \code{\link{ExprsModel-class}}\cr
 \code{\link{ExprsPipeline-class}}\cr
 \code{\link{ExprsEnsemble-class}}\cr
-\code{\link{ExprsPredict-class}}
+\code{\link{ExprsPredict-class}}\cr
+\code{\link{RegrsPredict-class}}
 }

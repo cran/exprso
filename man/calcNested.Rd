@@ -4,13 +4,13 @@
 \alias{calcNested}
 \title{Calculate \code{plNested} Performance}
 \usage{
-calcNested(pl, colBy)
+calcNested(pl, colBy = "valid.acc")
 }
 \arguments{
 \item{pl}{Specifies the \code{ExprsPipeline} object returned by \code{plNested}.}
 
 \item{colBy}{A character vector or string. Specifies column(s) to use when
-summarizing classifier performance. Listing multiple columns will calculate
+summarizing model performance. Listing multiple columns will calculate
 performance as a product of those listed performances.}
 }
 \value{

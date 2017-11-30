@@ -98,7 +98,7 @@ array.test <- balance[[1]]
 
 ## Selecting features
 
-Considering the high-dimensionality of many genomic datasets, it is prudent and often necessary to prioritize which features to include during classifier construction. This package provides functions for some of the most frequently used feature selection methods. Each function works as a self-contained wrapper that (1) pre-processes the `ExprsArray` input, (2) performs the feature selection, and (3) returns an `ExprsArray` output with an updated feature selection history. These histories get passed along at every step of the way until they eventually get used to pre-process an unlabeled dataset during classifier deployment (i.e., prediction).
+Considering the high-dimensionality of many datasets, it is prudent and often necessary to prioritize which features to include during classifier construction. This package provides functions for some of the most frequently used feature selection methods. Each function works as a self-contained wrapper that (1) pre-processes the `ExprsArray` input, (2) performs the feature selection, and (3) returns an `ExprsArray` output with an updated feature selection history. These histories get passed along at every step of the way until they eventually get used to pre-process an unlabeled dataset during classifier deployment (i.e., prediction).
 
 One feature selection function is `fsStats`. This performs basic feature selection based on simple statistical tests. Specifically, this function will rank features using either the Student's $t$-test or the Kolmogorov-Smirnov test. Below, the argument `top = 0` tells tells the program to rank all features.
 
@@ -242,9 +242,13 @@ calcStats(pred)
 
 Owing to how the `pipeFilter` function handles `ExprsPipeline` objects that contain a "boot" column in the performance summary (i.e., `@summary`), we include the `pipeUnboot` function to rename this "boot" column to "unboot". To learn more about how `ExprsEnsemble` predicts class labels, we refer the user to the documentation, `?'exprso-predict'`. In addition, we encourage the user to visit the documentation, `?'ExprsPipeline-class'` and `?'ExprsEnsemble-class'`.
 
-## Multi-class methods
+## Multi-class classification methods
 
 We conclude this vignette by alerting the user that the exprso package also includes a framework for performing multi-class classification in an automated manner. These methods use the "1-vs-all" approach to multi-class classification, whereby each individual class label has a turn getting treated as the positive class label in a dichotomous (binary) scheme. Then, the results of each iteration get integrated into a single construct. To learn more about multi-class classification, we refer the user to the documentation for `?doMulti` and the companion vignette, "Advanced Topics for the exprso package".
+
+## Regression methods
+
+The exprso package framework also extends to building and deploying regression models to predict continuous outcomes. All pipeline and ensemble methods discussed here also apply to regression, although some `fs` and `build` methods work only for classification.
 
 ## Final remarks
 

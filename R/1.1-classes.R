@@ -10,7 +10,8 @@
 #' \code{\link{ExprsModel-class}}\cr
 #' \code{\link{ExprsPipeline-class}}\cr
 #' \code{\link{ExprsEnsemble-class}}\cr
-#' \code{\link{ExprsPredict-class}}
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
 #' @export
 setClass("ExprsArray",
          slots = c(
@@ -44,22 +45,23 @@ setClass("ExprsMulti",
 #' An \code{ExprsArray} sub-class for data with continuous outcomes.
 #'
 #' @export
-setClass("ExprsCont",
+setClass("RegrsArray",
          contains = "ExprsArray"
 )
 
-#' An S4 class to store the classification model
+#' An S4 class to store the model
 #'
 #' @slot preFilter Typically a list. Stores feature selection history.
 #' @slot reductionModel Typically a list. Stores dimension reduction history.
-#' @slot mach Typically an S4 class. Stores the classification model.
+#' @slot mach Typically an S4 class. Stores the model.
 #'
 #' @seealso
 #' \code{\link{ExprsArray-class}}\cr
 #' \code{\link{ExprsModel-class}}\cr
 #' \code{\link{ExprsPipeline-class}}\cr
 #' \code{\link{ExprsEnsemble-class}}\cr
-#' \code{\link{ExprsPredict-class}}
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
 #' @export
 setClass("ExprsModel",
          slots = c(
@@ -69,29 +71,38 @@ setClass("ExprsModel",
          )
 )
 
-#' An S4 class to store the classification model
+#' An S4 class to store the model
 #'
-#' An \code{ExprsModel} sub-class for dichotomous classifiers.
+#' An \code{ExprsModel} sub-class for dichotomous models.
 #'
 #' @export
 setClass("ExprsMachine",
          contains = "ExprsModel"
 )
 
-#' An S4 class to store the classification model
+#' An S4 class to store the model
 #'
-#' An \code{ExprsModel} sub-class for multi-class classifiers.
+#' An \code{ExprsModel} sub-class for multi-class models.
 #'
 #' @export
 setClass("ExprsModule",
          contains = "ExprsModel"
 )
 
+#' An S4 class to store the model
+#'
+#' An \code{ExprsModel} sub-class for continuous outcome models.
+#'
+#' @export
+setClass("RegrsModel",
+         contains = "ExprsModel"
+)
+
 #' An S4 class to store models built during high-throughput learning
 #'
 #' @slot summary Typically a data.frame. Stores the parameters and
-#'  performances for classification models.
-#' @slot machs Typically a list. Stores the classification models
+#'  performances for the models.
+#' @slot machs Typically a list. Stores the models
 #'  referenced in \code{summary} slot.
 #'
 #' @seealso
@@ -99,7 +110,8 @@ setClass("ExprsModule",
 #' \code{\link{ExprsModel-class}}\cr
 #' \code{\link{ExprsPipeline-class}}\cr
 #' \code{\link{ExprsEnsemble-class}}\cr
-#' \code{\link{ExprsPredict-class}}
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
 #' @export
 setClass("ExprsPipeline",
          slots = c(
@@ -107,16 +119,17 @@ setClass("ExprsPipeline",
            machs = "ANY")
 )
 
-#' An S4 class to store multiple classification models
+#' An S4 class to store multiple models
 #'
-#' @slot machs Typically a list. Stores the classification models.
+#' @slot machs Typically a list. Stores the models.
 #'
 #' @seealso
 #' \code{\link{ExprsArray-class}}\cr
 #' \code{\link{ExprsModel-class}}\cr
 #' \code{\link{ExprsPipeline-class}}\cr
 #' \code{\link{ExprsEnsemble-class}}\cr
-#' \code{\link{ExprsPredict-class}}
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
 #' @export
 setClass("ExprsEnsemble",
          slots = c(
@@ -124,7 +137,7 @@ setClass("ExprsEnsemble",
          )
 )
 
-#' An S4 class to store class predictions
+#' An S4 class to store model predictions
 #'
 #' @slot pred A factor. Stores class predictions as an unambiguous
 #'  class assignment.
@@ -140,13 +153,35 @@ setClass("ExprsEnsemble",
 #' \code{\link{ExprsModel-class}}\cr
 #' \code{\link{ExprsPipeline-class}}\cr
 #' \code{\link{ExprsEnsemble-class}}\cr
-#' \code{\link{ExprsPredict-class}}
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
 #' @export
 setClass("ExprsPredict",
          slots = c(
            pred = "factor",
            decision.values = "ANY",
            probability = "ANY",
+           actual = "ANY"
+         )
+)
+
+#' An S4 class to store model predictions
+#'
+#' @slot pred Any. Stores predicted outcome.
+#' @slot actual Any. Stores actual outcome.
+#'  Used by \code{\link{calcStats}}.
+#'
+#' @seealso
+#' \code{\link{ExprsArray-class}}\cr
+#' \code{\link{ExprsModel-class}}\cr
+#' \code{\link{ExprsPipeline-class}}\cr
+#' \code{\link{ExprsEnsemble-class}}\cr
+#' \code{\link{ExprsPredict-class}}\cr
+#' \code{\link{RegrsPredict-class}}
+#' @export
+setClass("RegrsPredict",
+         slots = c(
+           pred = "ANY",
            actual = "ANY"
          )
 )

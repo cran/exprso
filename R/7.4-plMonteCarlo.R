@@ -1,68 +1,3 @@
-###########################################################
-### Cross-validation argument handlers
-
-#' Manage \code{split} Arguments
-#'
-#' This function organizes \code{split} arguments passed to \code{pl} functions.
-#'
-#' @param func A character string. The \code{split} function to call.
-#' @param percent.include Argument passed to the \code{split} function.
-#' @param ... Additional arguments passed to the \code{split} function.
-#' @return A list of arguments.
-#'
-#' @export
-ctrlSplitSet <- function(func, percent.include, ...){
-
-  list("func" = func,
-       "percent.include" = percent.include,
-       ...)
-}
-
-#' Manage \code{fs} Arguments
-#'
-#' This function organizes \code{fs} arguments passed to \code{pl} functions.
-#'
-#' @param func A character string. The \code{fs} function to call.
-#' @param top Argument passed to the \code{fs} function.
-#' @param ... Additional arguments passed to the \code{fs} function.
-#' @return A list of arguments.
-#'
-#' @export
-ctrlFeatureSelect <- function(func, top, ...){
-
-  list("func" = func,
-       "top" = top,
-       ...)
-}
-
-#' Manage \code{plGrid} Arguments
-#'
-#' This function organizes \code{plGrid} arguments passed to \code{pl} functions.
-#'
-#' @param func A character string. The \code{pl} function to call.
-#' @param top Argument passed to the \code{pl} function. Leave missing
-#'  when handling \code{plMonteCarlo} or \code{plNested} arguments.
-#' @param ... Additional arguments passed to the \code{pl} function.
-#' @return A list of arguments.
-#'
-#' @export
-ctrlGridSearch <- function(func, top, ...){
-
-  if(missing(top)){
-
-    list("func" = func,
-         ...)
-  }else{
-
-    list("func" = func,
-         "top" = top,
-         ...)
-  }
-}
-
-###########################################################
-### Monte Carlo cross-validation
-
 #' Monte Carlo Cross-Validation
 #'
 #' Perform Monte Carlo style cross-validation.
@@ -84,7 +19,7 @@ ctrlGridSearch <- function(func, top, ...){
 #'  function \code{\link{calcMonteCarlo}}.
 #'
 #' When embedding another \code{plMonteCarlo} or \code{plNested} call within
-#'  this function (i.e., via \code{ctrlGS}), outer-fold classifier performance
+#'  this function (i.e., via \code{ctrlGS}), outer-fold model performance
 #'  will force \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
 #'
 #' @param array Specifies the \code{ExprsArray} object to undergo cross-validation.
@@ -92,21 +27,10 @@ ctrlGridSearch <- function(func, top, ...){
 #' @param ctrlSS Arguments handled by \code{\link{ctrlSplitSet}}.
 #' @param ctrlFS A list of arguments handled by \code{\link{ctrlFeatureSelect}}.
 #' @param ctrlGS Arguments handled by \code{\link{ctrlGridSearch}}.
+#' @param ctrlMS Arguments handled by \code{\link{ctrlModSet}}. Optional.
 #' @param save A logical scalar. Toggles whether to save randomly split
 #'  training and validation sets.
-#'
 #' @return An \code{\link{ExprsPipeline-class}} object.
-#'
-#' @seealso
-#' \code{\link{fs}}\cr
-#' \code{\link{build}}\cr
-#' \code{\link{doMulti}}\cr
-#' \code{\link{exprso-predict}}\cr
-#' \code{\link{plCV}}\cr
-#' \code{\link{plGrid}}\cr
-#' \code{\link{plGridMulti}}\cr
-#' \code{\link{plMonteCarlo}}\cr
-#' \code{\link{plNested}}
 #'
 #' @examples
 #' \dontrun{
@@ -124,15 +48,23 @@ ctrlGridSearch <- function(func, top, ...){
 #' boot <- plMonteCarlo(array, B = 3, ctrlSS = ss, ctrlFS = fs, ctrlGS = gs)
 #' }
 #' @export
-plMonteCarlo <- function(array, B = 10, ctrlSS, ctrlFS, ctrlGS, save = FALSE){
+plMonteCarlo <- function(array, B = 10, ctrlSS, ctrlFS, ctrlGS, ctrlMS = NULL, save = FALSE){
 
   # For each bootstrap
   pls <- lapply(1:B,
                 function(boot){
 
+                  # Optionally apply a mod function here
+                  array.b <- array
+                  if(!is.null(ctrlMS)){
+                    func <- ctrlMS$func
+                    args <- append(list("object" = array), ctrlMS[!ctrlMS %in% func])
+                    array.b <- do.call(what = func, args = args)
+                  }
+
                   # Perform some split function (e.g. splitStrat)
                   func <- ctrlSS$func
-                  args <- append(list("object" = array), ctrlSS[!ctrlSS %in% func])
+                  args <- append(list("object" = array.b), ctrlSS[!ctrlSS %in% func])
                   arrays <- do.call(what = func, args = args)
                   array.boot <- arrays[[1]]
                   array.demi <- arrays[[2]]
@@ -217,46 +149,28 @@ plMonteCarlo <- function(array, B = 10, ctrlSS, ctrlFS, ctrlGS, save = FALSE){
 #'
 #' @param pl Specifies the \code{ExprsPipeline} object returned by \code{plMonteCarlo}.
 #' @param colBy A character vector or string. Specifies column(s) to use when
-#'  summarizing classifier performance. Listing multiple columns will calculate
+#'  summarizing model performance. Listing multiple columns will calculate
 #'  performance as a product of those listed performances.
 #' @return A numeric scalar. The cross-validation accuracy.
 #'
 #' @export
-calcMonteCarlo <- function(pl, colBy){
+calcMonteCarlo <- function(pl, colBy = "valid.acc"){
 
-  if(missing(colBy)) stop("Uh oh! Missing 'colBy' argument.")
+  if(!"boot" %in% colnames(pl@summary) | !"train.plCV" %in% colnames(pl@summary)){
+    stop("Summary must have 'boot' and 'train.plCV' columns.")
+  }
 
-  if("boot" %in% colnames(pl@summary)){
+  acc <- vector("numeric", length(unique(pl@summary$boot)))
+  for(b in 1:length(unique(pl@summary$boot))){
 
-    if("train.plCV" %in% colnames(pl@summary)){
+    # Subset only boot 'b'
+    boot <- pl@summary[pl@summary$boot == b, ]
 
-      # Prepare container to store validation accuracy
-      acc <- vector("numeric", length(unique(pl@summary$boot)))
+    # Select best model based on cross-validation accuracy
+    best <- boot[which.max(boot$train.plCV), ]
 
-      for(b in 1:length(unique(pl@summary$boot))){
-
-        cat("Retrieving best accuracy for boot", b, "...\n")
-
-        # Subset only boot 'b'
-        boot <- pl@summary[pl@summary$boot == b, ]
-
-        # Select best model based on cross-validation accuracy
-        best <- boot[which.max(boot$train.plCV), ]
-
-        # Save validation accuracy as colBy product
-        acc[b] <- apply(best[colBy], MARGIN = 1, prod)
-      }
-
-    }else{
-
-      stop("Uh oh! Supplied data not in expected format. ",
-           "Cannot calculate this cross-validation accuracy.")
-    }
-
-  }else{
-
-    stop("Uh oh! Supplied data not in expected format. ",
-         "Cannot calculate this cross-validation accuracy.")
+    # Save validation accuracy as colBy product
+    acc[b] <- apply(best[colBy], MARGIN = 1, prod)
   }
 
   # Return average validation accuracy

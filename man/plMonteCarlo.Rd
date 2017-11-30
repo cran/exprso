@@ -4,7 +4,8 @@
 \alias{plMonteCarlo}
 \title{Monte Carlo Cross-Validation}
 \usage{
-plMonteCarlo(array, B = 10, ctrlSS, ctrlFS, ctrlGS, save = FALSE)
+plMonteCarlo(array, B = 10, ctrlSS, ctrlFS, ctrlGS, ctrlMS = NULL,
+  save = FALSE)
 }
 \arguments{
 \item{array}{Specifies the \code{ExprsArray} object to undergo cross-validation.}
@@ -16,6 +17,8 @@ plMonteCarlo(array, B = 10, ctrlSS, ctrlFS, ctrlGS, save = FALSE)
 \item{ctrlFS}{A list of arguments handled by \code{\link{ctrlFeatureSelect}}.}
 
 \item{ctrlGS}{Arguments handled by \code{\link{ctrlGridSearch}}.}
+
+\item{ctrlMS}{Arguments handled by \code{\link{ctrlModSet}}. Optional.}
 
 \item{save}{A logical scalar. Toggles whether to save randomly split
 training and validation sets.}
@@ -44,7 +47,7 @@ To perform multiple feature selection tasks, supply a list of multiple
  function \code{\link{calcMonteCarlo}}.
 
 When embedding another \code{plMonteCarlo} or \code{plNested} call within
- this function (i.e., via \code{ctrlGS}), outer-fold classifier performance
+ this function (i.e., via \code{ctrlGS}), outer-fold model performance
  will force \code{aucSkip = TRUE} and \code{plotSkip = TRUE}.
 }
 \examples{
@@ -62,15 +65,4 @@ gs <- ctrlGridSearch(func = "plGrid", how = "buildSVM", top = c(2, 3, 4), fold =
                      kernel = c("linear", "radial"), cost = 10^(-3:3), gamma = 10^(-3:3))
 boot <- plMonteCarlo(array, B = 3, ctrlSS = ss, ctrlFS = fs, ctrlGS = gs)
 }
-}
-\seealso{
-\code{\link{fs}}\cr
-\code{\link{build}}\cr
-\code{\link{doMulti}}\cr
-\code{\link{exprso-predict}}\cr
-\code{\link{plCV}}\cr
-\code{\link{plGrid}}\cr
-\code{\link{plGridMulti}}\cr
-\code{\link{plMonteCarlo}}\cr
-\code{\link{plNested}}
 }

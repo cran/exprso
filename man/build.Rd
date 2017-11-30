@@ -19,25 +19,20 @@ The \code{exprso} package includes these build modules:
 - \code{\link{buildDNN}}
 }
 \details{
-These \code{build} methods construct a single classifier given an \code{ExprsArray}
- object and a set of parameters. This function returns an \code{ExprsModel} object.
- In the case of binary classification, these methods use an \code{ExprsBinary}
- object and return an \code{ExprsMachine} object. In the case of multi-class
- classification, these methods use an \code{ExprsMulti} object and return an
- \code{ExprsModule} object. In the case of multi-class classification, these methods
+In the case of multi-class classification, each \code{build} module can
  harness the \code{\link{doMulti}} function to perform "1 vs. all" classifier
  construction. In the setting of four class labels, a single \code{build} call
  will return four classifiers that work in concert to make a single prediction
  of an unlabelled subject. For building multiple classifiers across a vast
- parameter space in a high-throughput manner, see \code{pl} methods.
+ parameter space in a high-throughput manner, see \code{\link{pl}}.
 
 Like \code{\link{fs}} methods, \code{build} methods have a \code{top} argument
- which allows the user to specify which features to feed INTO the classifier
+ which allows the user to specify which features to feed INTO the model
  build. This effectively provides the user with one last opportunity to subset
  the feature space based on prior feature selection or dimension reduction.
  For all build methods, \code{@preFilter} and \code{@reductionModel} will
  get passed along to the resultant \code{ExprsModel} object, again ensuring
  that any test or validation sets will undergo the same feature selection and
- dimension reduction in the appropriate steps when deploying the classifier.
+ dimension reduction in the appropriate steps when deploying the model.
  Set \code{top = 0} to pass all features through a \code{build} method.
 }
