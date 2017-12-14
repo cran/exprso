@@ -1,8 +1,8 @@
-c275f0d973703a1a5dab198bdc60a4c6 *DESCRIPTION
+6cf63176f1599b7c2de25509605ebec0 *DESCRIPTION
 676fed19b60753d20a8ba873c03ad30e *NAMESPACE
-be4bb91fdd8942d5e5bb3fed174601e9 *NEWS.md
+b238c60e15e6a4d2629c95824eeaee28 *NEWS.md
 c8854a3d25eaa62cfbeab63980499931 *R/1.1-classes.R
-ff84115247f64726d736f81f07eccef6 *R/1.2-methods.R
+82dfe1432cbd5813ef6c993a480f23f0 *R/1.2-methods.R
 dfe1fd5b0f43ea573c651a4793c48d53 *R/1.3-exprso.R
 a223449543e9b8b3b064e3d4e718a33a *R/2-mod.R
 230d5b8c92751093ec9bb99a8456cba8 *R/3-split.R
@@ -26,12 +26,12 @@ b96ab62982010414a2076a36f35c3860 *R/7.5-plNested.R
 f8b9a307a817e96627a92cc85432957b *inst/CITATION
 5cb034eaad7d861325343106e7ae0cbc *inst/doc/a_introduction-vignette.R
 b159ea55cfbc95255c2550f76d7e3bb2 *inst/doc/a_introduction-vignette.Rmd
-5ae64397e7e9c69b6a2c8b22b3e0da6d *inst/doc/a_introduction-vignette.html
+d373892fa82ed48cfd05c29ea4651a95 *inst/doc/a_introduction-vignette.html
 f20ce2d78d4781839d437071a00b041c *inst/doc/b_advanced-vignette.R
 01e2b07f9ab2aa897e21558ff6a1ad65 *inst/doc/b_advanced-vignette.Rmd
-6bdfa6d769d4df5d10157d8c47c598a7 *inst/doc/b_advanced-vignette.html
+29d4fd78c5cd00ab5ef5d699bdcf1b9f *inst/doc/b_advanced-vignette.html
 0a365f2ce646bb7185d3092e079e98d2 *inst/doc/c_readme.Rmd
-2fc7a18ebb014abdcbbc957d954d36ad *inst/doc/c_readme.html
+0298a7745b254f796185c613cf976375 *inst/doc/c_readme.html
 a462ff372be02ce3b4c59d1f06df7431 *man/ExprsArray-class.Rd
 ac677c3ad7a3ce929909da3435091ebb *man/ExprsBinary-class.Rd
 249f649ef8760daa2057d94fb99b86cd *man/ExprsEnsemble-class.Rd
