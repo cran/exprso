@@ -30,7 +30,7 @@ splitSample <- function(object, percent.include = 67, ...){
   size <- round((ncol(object@exprs) * percent.include)/100, digits = 0)
   if(size == ncol(object@exprs)){
 
-    cat("Building a NULL validation set...\n\n")
+    warning("splitSample built an empty validation set...\n\n")
     return(list(
       "array.train" = object,
       "array.valid" = NULL)
@@ -129,8 +129,8 @@ splitStratify <- function(object, percent.include = 67, colBy = NULL,
     index.NAs <- apply(df, 1, function(row) !NA %in% row)
     df <- df[index.NAs, ]
 
-    cat("\nPre-stratification table:\n")
-    print(table(df))
+    # cat("\nPre-stratification table:\n")
+    # print(table(df))
 
     # Manipulate order of apply(df) so that size vector matches strata expectations
     sizes <- apply(table(df[, c("defineCase", rev(colBy))]), MARGIN = -1, FUN = min)
@@ -144,8 +144,8 @@ splitStratify <- function(object, percent.include = 67, colBy = NULL,
     s <- sampling::strata(df, stratanames = colnames(df), size = sizes, method = "srswor")
     if(!identical(rownames(s), rownames(df)[s$ID_unit])) stop("Uh oh! DEBUG ERROR: 001")
 
-    cat("\nWeighted stratification results:\n")
-    print(table(s[, colnames(df)]))
+    # cat("\nWeighted stratification results:\n")
+    # print(table(s[, colnames(df)]))
   }
 
   if(is.null(colBy)){
@@ -155,8 +155,8 @@ splitStratify <- function(object, percent.include = 67, colBy = NULL,
                      row.names = rownames(object@annot),
                      stringsAsFactors = FALSE)
 
-    cat("\nPre-stratification table:\n")
-    print(table(df))
+    # cat("\nPre-stratification table:\n")
+    # print(table(df))
 
     # Compute strata sizes
     sizes <- min(table(df))
@@ -170,12 +170,62 @@ splitStratify <- function(object, percent.include = 67, colBy = NULL,
     s <- sampling::strata(df, stratanames = colnames(df), size = sizes, method = "srswor")
     rownames(s) <- rownames(df)[s$ID_unit]
 
-    cat("\nWeighted stratification results:\n")
-    print(table(s[, colnames(df)]))
+    # cat("\nWeighted stratification results:\n")
+    # print(table(s[, colnames(df)]))
   }
 
   return(list(
     "array.train" = object[rownames(s), , drop = FALSE],
     "array.valid" = object[setdiff(rownames(object@annot), rownames(s)), , drop = FALSE])
+  )
+}
+
+#' Split by Balanced Sampling
+#'
+#' \code{splitBalance} is a wrapper that calls \code{splitStratify}
+#'  twice. In the first call, \code{splitStratify} is used to create a
+#'  balanced training set from the total data. In the second call,
+#'  \code{splitStratify} is used to create a balanced validation set
+#'  from the leftover data. This function ensures that there are always
+#'  an equal number of samples from each class in the split.
+#'
+#' @inheritParams splitSample
+#' @param ... Arguments passed to both \code{splitStratify} calls.
+#' @return Returns a list of two \code{ExprsArray} objects.
+#' @export
+splitBalanced <- function(object, percent.include = 67, ...){
+
+  sets1 <- splitStratify(object, percent.include = percent.include, ...)
+  sets2 <- splitStratify(sets1[[2]], percent.include = 100, ...)
+  list(
+    "array.train" = sets1$array.train,
+    "array.valid" = sets2$array.train
+  )
+}
+
+#' Split by User-defined Group
+#'
+#' \code{splitBy} builds a training set and validation set by placing
+#'  all samples that have the \code{include} annotation in the specified
+#'  \code{colBy} column in the training set. The remaining samples get
+#'  placed in the validation set. This \code{split} is not random.
+#'
+#' @inheritParams splitSample
+#' @param colBy A character string. Specifies the column used to split the data.
+#' @param include A character vector. Specifies which annotations in \code{colBy}
+#'  to include in the training set.
+#' @return Returns a list of two \code{ExprsArray} objects.
+#' @export
+splitBy <- function(object, colBy, include){
+
+  classCheck(object, c("ExprsBinary", "ExprsMulti"),
+             "This feature selection method only works for classification tasks.")
+
+  array.train <- subset(object, subset = object[, colBy] %in% include)
+  array.valid <- subset(object, subset = ! object[, colBy] %in% include)
+
+  return(list(
+    "array.train" = array.train,
+    "array.valid" = array.valid)
   )
 }

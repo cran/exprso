@@ -4,7 +4,8 @@
 \alias{fsStats}
 \title{Select Features by Statistical Testing}
 \usage{
-fsStats(object, top = 0, how = c("t.test", "ks.test"), ...)
+fsStats(object, top = 0, keep = 0, how = c("t.test", "ks.test",
+  "wilcox.test", "var.test"), ...)
 }
 \arguments{
 \item{object}{An \code{ExprsArray} object to undergo feature selection.}
@@ -15,8 +16,12 @@ indicates specifically which features by name should undergo feature selection.
 Set \code{top = 0} to include all features. A numeric vector can also be used
 to indicate specific features by location, similar to a character vector.}
 
-\item{how}{A character string. Toggles between the "t.test" and
-"ks.test" method. Argument for \code{fsStats} only.}
+\item{keep}{A numeric scalar. Specifies the number of top features that should get
+returned by the feature selection method. Use of \code{keep} is generally not
+recommended, but can speed up analyses of large data.}
+
+\item{how}{A character string. Toggles between the "t.test", "ks.test",
+"wilcox.test", and "var.test" methods.}
 
 \item{...}{Arguments passed to the detailed function.}
 }
@@ -24,6 +29,6 @@ to indicate specific features by location, similar to a character vector.}
 Returns an \code{ExprsArray} object.
 }
 \description{
-\code{fsStats} selects features using the \code{t.test} or \code{ks.test}
+\code{fsStats} selects features using a base R statistics
  function (toggled by the \code{how} argument).
 }

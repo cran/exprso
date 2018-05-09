@@ -1,6 +1,6 @@
 #' @importFrom methods new as show
-#' @importFrom stats aov t.test ks.test prcomp cor
-#' @importFrom stats median quantile
+#' @importFrom stats aov t.test ks.test wilcox.test var.test
+#' @importFrom stats prcomp cor median quantile
 #' @importFrom utils write.csv
 #' @importFrom plyr rbind.fill
 #' @importMethodsFrom kernlab predict
@@ -56,10 +56,12 @@ getArgs <- function(...){
 #' @param what The name of the argument.
 #' @param as The value to set it as.
 #' @param args An args list. The result of \code{\link{getArgs}}.
-defaultArg <- function(what, as, args){
+#' @param verbose A boolean. Toggles whether to alert
+#'  the user that an argument is set.
+defaultArg <- function(what, as, args, verbose = TRUE){
 
   if(!what %in% names(args)){
-    cat("Setting", what, "to", as.character(as), "(default behavior, override explicitly)...\n")
+    if(verbose) message("Setting ", what, " to ", as.character(as), " (default behavior, override explicitly)...\n")
     as <- list(as); names(as) <- what
     args <- append(args, as)
   }
@@ -69,16 +71,16 @@ defaultArg <- function(what, as, args){
 
 #' Force an args List Element to Value
 #' @inheritParams defaultArg
-forceArg <- function(what, as, args){
+forceArg <- function(what, as, args, verbose = TRUE){
 
   if(!what %in% names(args)){
-    cat("Setting", what, "to", as.character(as), "(forced behavior, cannot override)...\n")
+    if(verbose) message("Setting ", what, " to ", as.character(as), " (forced behavior, cannot override)...\n")
     as <- list(as); names(as) <- what
     args <- append(args, as)
   }else{
     if(args[[what]] == as){
-      cat(paste0("Uh oh! This function requires ", what, " = ", as,
-                 ". Setting ", what, " to ", as, "...\n"))
+      if(verbose) message(paste0("Uh oh! This function requires ", what, " = ", as,
+                                 ". Setting ", what, " to ", as, "...\n"))
       args[[what]] <- as
     }
   }
@@ -153,7 +155,7 @@ ctrlModSet <- function(func, ...){
 #' @param ... Additional arguments passed to the \code{split} function.
 #' @return A list of arguments.
 #' @export
-ctrlSplitSet <- function(func, percent.include, ...){
+ctrlSplitSet <- function(func, percent.include = 67, ...){
 
   list("func" = func, "percent.include" = percent.include, ...)
 }
@@ -167,7 +169,7 @@ ctrlSplitSet <- function(func, percent.include, ...){
 #' @param ... Additional arguments passed to the \code{fs} function.
 #' @return A list of arguments.
 #' @export
-ctrlFeatureSelect <- function(func, top, ...){
+ctrlFeatureSelect <- function(func, top = 0, ...){
 
   list("func" = func, "top" = top, ...)
 }
@@ -182,7 +184,7 @@ ctrlFeatureSelect <- function(func, top, ...){
 #' @param ... Additional arguments passed to the \code{pl} function.
 #' @return A list of arguments.
 #' @export
-ctrlGridSearch <- function(func, top, ...){
+ctrlGridSearch <- function(func, top = 0, ...){
 
   if(missing(top)){ list("func" = func, ...)
   }else{ list("func" = func, "top" = top, ...) }
@@ -205,4 +207,30 @@ check.ctrlGS <- function(args){
   }
 
   return(args)
+}
+
+#' Make Progress Bar
+#'
+#' @param i The current iteration.
+#' @param k Total iterations.
+#' @param numTicks The result of \code{progress}.
+#' @return The next \code{numTicks} argument.
+progress <- function(i, k, numTicks){
+
+  if(i == 1) numTicks <- 0
+
+  if(numTicks == 0) cat("|-")
+
+  while(i > numTicks*(k/40)){
+
+    cat("-")
+    if(numTicks == 10) cat("(25%)")
+    if(numTicks == 20) cat("(50%)")
+    if(numTicks == 30) cat("(75%)")
+    numTicks <- numTicks + 1
+  }
+
+  if(i == k) cat("-|\n")
+
+  return(numTicks)
 }

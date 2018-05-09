@@ -12,11 +12,20 @@ build. <- function(object, top, uniqueFx, ...){
   if(class(top) == "numeric"){
     if(length(top) == 1){
       if(top > nrow(object@exprs)) top <- 0
-      if(top == 0) top <- nrow(object@exprs)
-      top <- rownames(object@exprs[1:top, ])
+      if(top == 0){
+        top <- rownames(object@exprs) # keep for uniqueFx
+        if(class(object) != "ExprsMulti") data <- t(object@exprs)
+      }else{
+        top <- rownames(object@exprs)[1:top]
+        if(class(object) != "ExprsMulti") data <- t(object@exprs[top, , drop = FALSE])
+      }
     }else{
-      top <- rownames(object@exprs[top, ])
+      top <- rownames(object@exprs)[top] # when top is numeric vector
+      if(class(object) != "ExprsMulti") data <- t(object@exprs[top, , drop = FALSE])
     }
+  }else{
+    # top <- top # feature names already specified
+    if(class(object) != "ExprsMulti") data <- t(object@exprs[top, , drop = FALSE])
   }
 
   # Carry through and append fs history as stored in the ExprsArray object
@@ -30,15 +39,13 @@ build. <- function(object, top, uniqueFx, ...){
              reductionModel = append(object@reductionModel, list(NA)),
              mach = machs)
   }else if(class(object) == "ExprsBinary"){
-    data <- t(object@exprs[top, ])
-    labels <- factor(object@annot[rownames(data), "defineCase"], levels = c("Control", "Case"))
+    labels <- factor(object@annot$defineCase, levels = c("Control", "Case"))
     model <- do.call("uniqueFx", list(data, labels, ...))
     m <- new("ExprsMachine",
              preFilter = append(object@preFilter, list(top)),
              reductionModel = append(object@reductionModel, list(NA)),
              mach = model)
   }else if(class(object) == "RegrsArray"){
-    data <- t(object@exprs[top, ])
     labels <- object@annot$defineCase
     model <- do.call("uniqueFx", list(data, labels, ...))
     m <- new("RegrsModel",
@@ -177,6 +184,76 @@ buildSVM <- function(object, top = 0, ...){ # args to svm
          }, ...)
 }
 
+#' Build Linear Model
+#'
+#' \code{buildLM} builds a model using the \code{lm} function.
+#'
+#' @inheritParams build.
+#' @return Returns an \code{ExprsModel} object.
+#' @export
+buildLM <- function(object, top = 0, ...){ # args to lm
+
+  classCheck(object, "RegrsArray",
+             "This feature selection method only works for continuous outcome tasks.")
+
+  build.(object, top,
+         uniqueFx = function(data, labels, ...){
+
+           # Perform LM via ~ method
+           args <- getArgs(...)
+           df <- data.frame(data, "defineCase" = as.numeric(labels))
+           args <- append(list("formula" = defineCase ~ ., "data" = df), args)
+           do.call(stats::lm, args)
+         }, ...)
+}
+
+#' Build Generalized Linear Model
+#'
+#' \code{buildGLM} builds a model using the \code{glm} function.
+#'
+#' @inheritParams build.
+#' @return Returns an \code{ExprsModel} object.
+#' @export
+buildGLM <- function(object, top = 0, ...){ # args to glm
+
+  classCheck(object, "RegrsArray",
+             "This feature selection method only works for continuous outcome tasks.")
+
+  build.(object, top,
+         uniqueFx = function(data, labels, ...){
+
+           # Perform GLM via ~ method
+           args <- getArgs(...)
+           df <- data.frame(data, "defineCase" = as.numeric(labels))
+           args <- append(list("formula" = defineCase ~ ., "data" = df), args)
+           do.call(stats::glm, args)
+         }, ...)
+}
+
+#' Build Logistic Regression Model
+#'
+#' \code{buildLR} builds a model using the \code{glm} function.
+#'
+#' @inheritParams build.
+#' @return Returns an \code{ExprsModel} object.
+#' @export
+buildLR <- function(object, top = 0, ...){ # args to glm
+
+  classCheck(object, c("ExprsBinary", "ExprsMulti"),
+             "This build method only works for classification tasks.")
+
+  build.(object, top,
+         uniqueFx = function(data, labels, ...){
+
+           # Perform GLM via ~ method
+           args <- getArgs(...)
+           args <- forceArg("family", "binomial", args)
+           df <- data.frame(data, "defineCase" = as.numeric(labels) - 1)
+           args <- append(list("formula" = defineCase ~ ., "data" = df), args)
+           do.call(stats::glm, args)
+         }, ...)
+}
+
 #' Build Artificial Neural Network Model
 #'
 #' \code{buildANN} builds a model using the \code{nnet} function
@@ -196,12 +273,48 @@ buildANN <- function(object, top = 0, ...){ # args to nnet
            # Perform ANN via ~ method
            args <- getArgs(...)
            args <- defaultArg("size", 1, args)
-           args <- defaultArg("range", 1/max(abs(as.vector(data))), args)
-           args <- defaultArg("decay", 0.5, args)
+           args <- defaultArg("rang", 1/max(abs(as.vector(data))), args)
            args <- defaultArg("maxit", 1000, args)
            df <- data.frame(data, "defineCase" = labels)
            args <- append(list("formula" = defineCase ~ ., "data" = df), args)
-           do.call(nnet::nnet, args)
+           sink(tempfile())
+           m <- do.call(nnet::nnet, args)
+           sink()
+           m
+         }, ...)
+}
+
+#' Build Decision Tree Model
+#'
+#' \code{buildDT} builds a model using the \code{rpart} function
+#'  from the \code{rpart} package.
+#'
+#' Provide \code{cp} as a numeric scalar to trim the \code{rpart} decision tree.
+#'  If provided, this argument is passed to the \code{rpart::prune} function.
+#'  Set \code{cp = 0} to skip pruning (default behavior).
+#'
+#' @inheritParams build.
+#' @return Returns an \code{ExprsModel} object.
+#' @export
+buildDT <- function(object, top = 0, ...){ # args to rpart
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  build.(object, top,
+         uniqueFx = function(data, labels, ...){
+
+           # Perform rpart via ~ method
+           args <- getArgs(...)
+           args <- defaultArg("cp", 0, args)
+           prune <- args$cp
+           args <- args[!"cp" == names(args)]
+
+           df <- data.frame(data, "defineCase" = labels)
+           args <- append(list("formula" = defineCase ~ ., "data" = df), args)
+           tree <- do.call(rpart::rpart, args)
+           if(prune != 0) tree <- rpart::prune(tree, cp = prune) # optional pruning
+           tree
          }, ...)
 }
 
@@ -226,6 +339,30 @@ buildRF <- function(object, top = 0, ...){ # args to randomForest
            df <- data.frame(data, "defineCase" = labels)
            args <- append(list("formula" = defineCase ~ ., "data" = df), args)
            do.call(randomForest::randomForest, args)
+         }, ...)
+}
+
+#' Build Fuzzy Rule Based Model
+#'
+#' \code{buildFRB} builds a model using the \code{frbs} function
+#'  from the \code{frbs} package.
+#'
+#' @inheritParams build.
+#' @return Returns an \code{ExprsModel} object.
+#' @export
+buildFRB <- function(object, top = 0, ...){ # args to frbs
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  build.(object, top,
+         uniqueFx = function(data, labels, ...){
+
+           # Perform frbs via df method
+           args <- getArgs(...)
+           df <- data.frame(data, "defineCase" = as.numeric(labels))
+           args <- append(list("data.train" = df), args)
+           do.call(frbs::frbs.learn, args)
          }, ...)
 }
 

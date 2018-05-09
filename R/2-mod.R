@@ -22,22 +22,33 @@ modHistory <- function(object, reference){
   }
 
   # Duplicate starting with first non-overlapping history
+  unsortedFeatures <- rownames(object@exprs)
   index <- length(object@reductionModel) + 1
-  for(i in index:length(reference@reductionModel)){
+  for(i in index:length(reference@reductionModel)){ # for every fs in reference...
 
-    if(any(is.na(reference@reductionModel[[i]]))){ # apply fs only
-      exprs.i <- object@exprs[reference@preFilter[[i]], , drop = FALSE]
-    }else{ # apply fs and dimension reduction
-      data <- data.frame(t(object@exprs[reference@preFilter[[i]], , drop = FALSE]))
-      if("prcomp" %in% class(reference@reductionModel[[i]])){
-        exprs.i <- t(predict(reference@reductionModel[[i]], data))
-      }else{ stop("Reduction model class not recognized.") }
+    indexedFeatures <- reference@preFilter[[i]]
+    indexedModel <- reference@reductionModel[[i]]
+    if(any(is.na(indexedModel))){ # apply fs (via top) only
+
+      if(identical(indexedFeatures, unsortedFeatures)){
+        exprs.i <- object@exprs # avoid unnecessary subsets
+      }else{
+        exprs.i <- object@exprs[indexedFeatures, , drop = FALSE]
+      }
+
+    }else{ # apply fs (via top) and dimension reduction
+
+      data <- data.frame(t(object@exprs[indexedFeatures, , drop = FALSE]))
+      if("prcomp" %in% class(indexedModel)){
+        exprs.i <- t(predict(indexedModel, data))
+      }else{
+        stop("Reduction model not recognized.")
+      }
     }
 
     object <- new(class(object), exprs = exprs.i, annot = object@annot,
-                  preFilter = append(object@preFilter, list(reference@preFilter[[i]])),
-                  reductionModel = append(object@reductionModel,
-                                          list(reference@reductionModel[[i]])))
+                  preFilter = append(object@preFilter, list(indexedFeatures)),
+                  reductionModel = append(object@reductionModel, list(indexedModel)))
   }
 
   return(object)
@@ -86,17 +97,59 @@ modFilter <- function(object, threshold, maximum, beta1, beta2){
 
 #' Log Transform Data
 #'
-#' \code{modTransform} log (base 2) transforms feature data.
+#' \code{modTransform} log transforms feature data.
 #'
 #' @inheritParams modFilter
+#' @param base A numeric scalar. The base of the logarithm.
 #' @return A pre-processed \code{ExprsArray} object.
 #' @export
-modTransform <- function(object){
+modTransform <- function(object, base = exp(1)){
 
   classCheck(object, "ExprsArray",
              "This function is applied to the results of ?exprso.")
 
-  object@exprs <- log(object@exprs, base = 2)
+  object@exprs <- log(object@exprs, base = base)
+  return(object)
+}
+
+#' Sample Features from Data
+#'
+#' \code{modSample} samples features from a data set randomly without
+#'  replacement. When \code{size = 0}, this is equivalent to
+#'  \code{fsSample, top = 0}, but much quicker.
+#'
+#' @inheritParams modFilter
+#' @param size A numeric scalar. The number of randomly sampled features
+#'  to include in the pre-processed \code{ExprsArray} object.
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modSample <- function(object, size = 0){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  if(size == 0) size <- nrow(object@exprs)
+  keep <- sample(1:nrow(object@exprs), size = size)
+  object@exprs <- object@exprs[keep,,drop = FALSE]
+  return(object)
+}
+
+#' Select Features from Data
+#'
+#' \code{modSelect} selects specific features from a data set. Unlike
+#'  \code{fsInclude}, this function does not update \code{@@preFilter}
+#'  and returns only those features stated by \code{include}.
+#'
+#' @inheritParams modFilter
+#' @param include A character vector. The names of features to include.
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modInclude <- function(object, include = rownames(object@exprs)){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  object@exprs <- object@exprs[include,,drop = FALSE]
   return(object)
 }
 
@@ -181,5 +234,68 @@ modCLR <- function(object){
 
   logX <- log(object@exprs)
   object@exprs <- apply(logX, 2, function(x) x / mean(x))
+  return(object)
+}
+
+#' Recast Data as Feature Ratios
+#'
+#' \code{modRatios} recasts a data set with N feature columns as a new
+#'  data set with N * (N - 1) / 2 feature ratio columns.
+#'
+#' @inheritParams modHistory
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modRatios <- function(object){
+
+  packageCheck("propr")
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  object@exprs <- t(propr::ratios(t(object@exprs)))
+  return(object)
+}
+
+#' Rescale Data by Factor Range
+#'
+#' \code{modScale} rescales a data set by making all sample vectors
+#'  have the same total sum, then multiplying each sample vector by
+#'  a scaling factor.
+#'
+#' If \code{uniform = TRUE}, scaling factors are randomly sampled from
+#'  the uniform distribution \code{(0, alpha) + 1}. Otherwise, scaling
+#'  factors are randomly sampled from the normal distribution with
+#'  a mean of 0 and standard deviation of \code{alpha}. When using
+#'  the normal distribution, these scaling factors are transformed by
+#'  taking the absolute value then adding one. For this reason,
+#'  data are always unscaled when \code{alpha = 0}.
+#'
+#' @inheritParams modHistory
+#' @param alpha An integer. The maximum range of scaling factors used
+#'  for scaling if \code{uniform = TRUE}. The standard deviation
+#'  of the scaling factors if \code{uniform = FALSE}. See Details.
+#' @param uniform A boolean. Toggles whether to draw scaling factors
+#'  from a uniform distribution or a normal distribution.
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modScale <- function(object, alpha = 0, uniform = TRUE){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  if(uniform){
+
+    # Draw scaling factors from Uniform distribution
+    lambda <- stats::runif(ncol(object@exprs), min = 0, max = alpha) + 1
+
+  }else{
+
+    # Draw scaling factors from Normal distribution
+    lambda <- abs(stats::rnorm(ncol(object@exprs), mean = 0, sd = alpha)) + 1
+  }
+
+  # Apply scale to weigh samples
+  object <- modAcomp(object)
+  newdata <- apply(object@exprs, 1, function(x) x * lambda)
+  object@exprs <- t(newdata)
   return(object)
 }

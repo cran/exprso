@@ -58,9 +58,26 @@ setMethod("predict", "ExprsMachine",
               pred <- predict(object@mach, data, probability = TRUE)
               px <- attr(pred, "probabilities")
 
+            }else if("lm" %in% class(object@mach)){ # logistic regression
+
+              px <- stats::plogis(predict(object@mach, data))
+              px <- cbind(px, 1 - px)
+              colnames(px) <- c("Case", "Control") # do not delete this line!
+
             }else if("nnet" %in% class(object@mach)){
 
               px <- predict(object@mach, data, type = "raw")
+              px <- cbind(px, 1 - px)
+              colnames(px) <- c("Case", "Control") # do not delete this line!
+
+            }else if("rpart" %in% class(object@mach)){
+
+              px <- predict(object@mach, data)
+
+            }else if("frbs" %in% class(object@mach)){
+
+              px <- round(predict(object@mach, data))
+              px[, 1] <- ifelse(px[, 1] == 2, 1, 0) # 1 is Control; 2 is Case
               px <- cbind(px, 1 - px)
               colnames(px) <- c("Case", "Control") # do not delete this line!
 
@@ -225,9 +242,15 @@ setMethod("predict", "RegrsModel",
 
             if("svm" %in% class(object@mach) |
                "nnet" %in% class(object@mach) |
-               "randomForest" %in% class(object@mach)){
+               "randomForest" %in% class(object@mach) |
+               "rpart" %in% class(object@mach) |
+               "lm" %in% class(object@mach)){
 
               pred <- predict(object@mach, data)
+
+            }else if("frbs" %in% class(object@mach)){
+
+              pred <- as.numeric(predict(object@mach, data))
 
             }else if("H2ORegressionModel" %in% class(object@mach)){
 

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Thomas Quinn" />
 
-<meta name="date" content="2017-12-15" />
+<meta name="date" content="2018-05-09" />
 
 <title>An Introduction to the exprso Package</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">An Introduction to the exprso Package</h1>
 <h4 class="author"><em>Thomas Quinn</em></h4>
-<h4 class="date"><em>2017-12-15</em></h4>
+<h4 class="date"><em>2018-05-09</em></h4>
 
 
 
@@ -110,15 +110,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2>Importing data</h2>
 <p>We recommend importing data using the <code>exprso</code> function. This function has two arguments. The first expects the data with samples as rows and features as columns. The second expects the annotations with samples as rows where the first column contains the outcome to predict.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">data</span>(iris)
-array &lt;-<span class="st"> </span><span class="kw">exprso</span>(iris[<span class="dv">1</span><span class="op">:</span><span class="dv">80</span>, <span class="dv">1</span><span class="op">:</span><span class="dv">4</span>], iris[<span class="dv">1</span><span class="op">:</span><span class="dv">80</span>, <span class="dv">5</span>])</code></pre></div>
-<pre><code>## [1] &quot;Preparing data for binary classification.&quot;</code></pre>
+array &lt;-<span class="st"> </span><span class="kw">exprso</span>(iris[<span class="dv">1</span>:<span class="dv">80</span>, <span class="dv">1</span>:<span class="dv">4</span>], iris[<span class="dv">1</span>:<span class="dv">80</span>, <span class="dv">5</span>])</code></pre></div>
+<pre><code>## [1] &quot;Preparing data for binary classification.&quot;
+## [1] &quot;Converting binary labels to CONTROL / CASE.&quot;
+## [1] &quot;CONTROL: setosa (override with 'switch')&quot;</code></pre>
 </div>
 <div id="subsetting-data" class="section level2">
 <h2>Subsetting data</h2>
 <p>To subset an <code>ExprsArray</code> object, we provide methods for the <code>[</code> and <code>$</code> operators that access the <code>@annot</code> annotations slot directly. Alternatively, one could use the <code>modSubset</code> or <code>subset</code> functions. Note that the “defineCase” column always contains the outcome to predict. For binary classification, this is always coded as “Case” and “Control”.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>array[array<span class="op">$</span>defineCase <span class="op">==</span><span class="st"> &quot;Case&quot;</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>array[array$defineCase ==<span class="st"> &quot;Case&quot;</span>, ]
 sub &lt;-<span class="st"> </span><span class="kw">modSubset</span>(array, <span class="dt">colBy =</span> <span class="st">&quot;defineCase&quot;</span>, <span class="dt">include =</span> <span class="st">&quot;Case&quot;</span>)
-sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span class="dt">subset =</span> array<span class="op">$</span>defineCase <span class="op">==</span><span class="st"> &quot;Case&quot;</span>)</code></pre></div>
+sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span class="dt">subset =</span> array$defineCase ==<span class="st"> &quot;Case&quot;</span>)</code></pre></div>
 </div>
 <div id="splitting-data" class="section level2">
 <h2>Splitting data</h2>
@@ -126,18 +128,9 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">arrays &lt;-
 <span class="st">  </span><span class="kw">splitStratify</span>(array,
                 <span class="dt">percent.include =</span> <span class="dv">67</span>,
-                <span class="dt">colBy =</span> <span class="ot">NULL</span>)</code></pre></div>
-<pre><code>## 
-## Pre-stratification table:
-## df
-##    Case Control 
-##      30      50 
-## 
-## Weighted stratification results:
-## 
-##    Case Control 
-##      20      20</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">array.train &lt;-<span class="st"> </span>arrays[[<span class="dv">1</span>]]</code></pre></div>
+                <span class="dt">colBy =</span> <span class="ot">NULL</span>)
+
+array.train &lt;-<span class="st"> </span>arrays[[<span class="dv">1</span>]]</code></pre></div>
 </div>
 <div id="balancing-data" class="section level2">
 <h2>Balancing data</h2>
@@ -145,18 +138,9 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">balance &lt;-
 <span class="st">  </span><span class="kw">splitStratify</span>(arrays[[<span class="dv">2</span>]],
                 <span class="dt">percent.include =</span> <span class="dv">100</span>,
-                <span class="dt">colBy =</span> <span class="ot">NULL</span>)</code></pre></div>
-<pre><code>## 
-## Pre-stratification table:
-## df
-##    Case Control 
-##      10      30 
-## 
-## Weighted stratification results:
-## 
-##    Case Control 
-##      10      10</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">array.test &lt;-<span class="st"> </span>balance[[<span class="dv">1</span>]]</code></pre></div>
+                <span class="dt">colBy =</span> <span class="ot">NULL</span>)
+
+array.test &lt;-<span class="st"> </span>balance[[<span class="dv">1</span>]]</code></pre></div>
 </div>
 <div id="selecting-features" class="section level2">
 <h2>Selecting features</h2>
@@ -170,6 +154,8 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
 <span class="st">  </span><span class="kw">fsPrcomp</span>(array.train, <span class="dt">top =</span> <span class="dv">50</span>)</code></pre></div>
 <p>The other feature selection methods included in this package all follow the same use pattern. Below, we plot the first three components of the training set in 3-dimensional space.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">plot</span>(array.train)</code></pre></div>
+<pre><code>## Setting pch to 19 (default behavior, override explicitly)...</code></pre>
+<pre><code>## Setting col to #00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#00FFFFFF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF#FF0000FF (default behavior, override explicitly)...</code></pre>
 <p><img src="data:image/png;base64,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" /><!-- --></p>
 </div>
 <div id="constructing-classifiers" class="section level2">
@@ -177,17 +163,8 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
 <p>This package provides functions for several supervised machine learning methods, including support vector machines, artificial neural networks, random forests, and more. These functions require an <code>ExprsArray</code> object as input and return an <code>ExprsModel</code> object as output. This <code>ExprsModel</code> object contains the feature selection history that led up to classifier construction as well as the classifier itself. Below, we build an artificial neural network with five intermediate nodes in the hidden layer using the top 10 components from the <em>training set</em> above.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">mach &lt;-
 <span class="st">  </span><span class="kw">buildANN</span>(array.train, <span class="dt">top =</span> <span class="dv">10</span>, <span class="dt">size =</span> <span class="dv">5</span>)</code></pre></div>
-<pre><code>## Setting range to 0.38759719586878 (default behavior, override explicitly)...
-## Setting decay to 0.5 (default behavior, override explicitly)...
-## Setting maxit to 1000 (default behavior, override explicitly)...
-## # weights:  31
-## initial  value 40.316989 
-## iter  10 value 12.124033
-## iter  20 value 12.078803
-## iter  20 value 12.078803
-## iter  20 value 12.078803
-## final  value 12.078803 
-## converged</code></pre>
+<pre><code>## Setting rang to 0.38759719586878 (default behavior, override explicitly)...</code></pre>
+<pre><code>## Setting maxit to 1000 (default behavior, override explicitly)...</code></pre>
 </div>
 <div id="deploying-classifiers" class="section level2">
 <h2>Deploying classifiers</h2>
@@ -227,13 +204,1161 @@ sub &lt;-<span class="st"> </span><span class="kw">subset</span>(array, <span cl
          <span class="dt">how =</span> <span class="st">&quot;buildSVM&quot;</span>,
          <span class="dt">fold =</span> <span class="dv">0</span>,
          <span class="dt">kernel =</span> <span class="st">&quot;linear&quot;</span>,
-         <span class="dt">cost =</span> <span class="dv">10</span><span class="op">^</span>(<span class="op">-</span><span class="dv">3</span><span class="op">:</span><span class="dv">3</span>)
+         <span class="dt">cost =</span> <span class="dv">10</span>^(-<span class="dv">3</span>:<span class="dv">3</span>)
 )</code></pre></div>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting probability to TRUE (forced behavior, cannot override)...</code></pre>
+<pre><code>## Setting cross to 0 (forced behavior, cannot override)...</code></pre>
 <p>The returned object contains two slots, <code>@summary</code> and <code>@machs</code>, which store the performance summary and corresponding <code>ExprsModel</code> objects, respectively. The performance summary contains columns detailing the parameters used to build each machine along with performance metrics for the training set (and test set, if provided). Columns named with “train” describe training set performances. Columns named with “valid” describe test set performances. The column, <code>&quot;train.plCV&quot;</code>, contains the cross-validation accuracy, if performed. The returned <code>ExprsPipeline</code> object also contains an <code>ExprsModel</code> object for each entry in the performance summary.</p>
 <p>To subset an <code>ExprsPipeline</code> object, we provide methods for the <code>[</code> and <code>$</code> operators that access the <code>@summary</code> performance summary slot directly. Alternatively, one could use the <code>pipeSubset</code> or <code>subset</code> functions.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>gs[gs<span class="op">$</span>cost <span class="op">==</span><span class="st"> </span><span class="dv">1</span>, ]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">sub &lt;-<span class="st"> </span>gs[gs$cost ==<span class="st"> </span><span class="dv">1</span>, ]
 sub &lt;-<span class="st"> </span><span class="kw">pipeSubset</span>(gs, <span class="dt">colBy =</span> <span class="st">&quot;cost&quot;</span>, <span class="dt">include =</span> <span class="dv">1</span>)
-sub &lt;-<span class="st"> </span><span class="kw">subset</span>(gs, <span class="dt">subset =</span> gs<span class="op">$</span>cost <span class="op">==</span><span class="st"> </span><span class="dv">1</span>)</code></pre></div>
+sub &lt;-<span class="st"> </span><span class="kw">subset</span>(gs, <span class="dt">subset =</span> gs$cost ==<span class="st"> </span><span class="dv">1</span>)</code></pre></div>
 </div>
 <div id="other-cross-validation" class="section level2">
 <h2>Other cross-validation</h2>
@@ -250,7 +1375,7 @@ gs &lt;-
                  <span class="dt">how =</span> <span class="st">&quot;buildSVM&quot;</span>,
                  <span class="dt">top =</span> <span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>),
                  <span class="dt">kernel =</span> <span class="st">&quot;linear&quot;</span>,
-                 <span class="dt">cost =</span> <span class="dv">10</span><span class="op">^</span>(<span class="op">-</span><span class="dv">3</span><span class="op">:</span><span class="dv">3</span>),
+                 <span class="dt">cost =</span> <span class="dv">10</span>^(-<span class="dv">3</span>:<span class="dv">3</span>),
                  <span class="dt">fold =</span> <span class="dv">10</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">boot &lt;-
 <span class="st">  </span><span class="kw">plMonteCarlo</span>(arrays[[<span class="dv">1</span>]],

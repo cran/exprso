@@ -1,3 +1,93 @@
+## exprso 0.3.6
+---------------------
+* General changes
+    * `exprso` can now swap "Control" and "Case" labels with `switch` argument
+    * `exprso` no longer gives error when importing tabular annotations
+    * `exprso` can now predict any column from tabular annotations
+
+## exprso 0.3.5
+---------------------
+* Update `split` modules
+    * Add `splitBalanced` to balance both the training and validation sets
+
+## exprso 0.3.4
+---------------------
+* Update `mod` modules
+    * Add `modInclude` function to select specific features from a data set
+    * Rename `modShuffle` to `modSample`
+
+## exprso 0.3.3
+---------------------
+* General changes
+    * `exprso` no longer alters labels already called "Control" and "Case"
+* Update `split` modules
+    * `splitStratify` now runs quietly
+    * `splitSample` NULL validation set `cat` changed to a warning
+
+## exprso 0.3.2
+---------------------
+* Update `fs` modules
+    * Add `keep` argument to subset features after performing selection
+    * Use of `keep` can speed up model deployment for lage data sets
+
+## exprso 0.3.1
+---------------------
+* Update `mod` modules
+    * Add `base = exp(1)` argument as default for `modTransform` method
+* Update `fs` modules
+    * Add `modRatios` argument to `fsPropd` for data provided as ratios
+* Update `split` modules
+    * Add `splitBy` function to split data by user-defined group
+* General changes
+    * Improve performance by making fewer subsets with `fs.` and `build.`
+    * Improve performance by making fewer subsets with `modHistory`
+
+## exprso 0.3.0
+---------------------
+* Update `mod` modules
+    * Replace `modScale` with a new procedure that uses `runif`
+    * Extend `modScale` with another method that uses `rnorm`
+    * Add `size` argument to `modShuffle`
+* Update `fs` modules
+    * New `fsRankProd` method ranks features using `RankProd` package
+    * Extend `fsStats` to use `wilcox.test` and `f.test`
+    * Add `suppressMessages` to `fsPropd` module
+* Update `build` modules
+    * Sink printed output from `nnet` function
+    * Tweak default `buildANN` arguments
+* Major `verbose = FALSE` update
+    * Add `verbose` to toggle `defaultArg` and `forceArg` messages
+    * Force `verbose = FALSE` for `calcStats` calls from `plCV`
+    * Make `verbose = FALSE` the default for `plGrid`
+* General changes
+    * Add `progress` function to list of global functions
+    * Add `suppressMessages` to `plMonteCarlo` and `plNested` calls
+    * Embed `progress` bar in `plMonteCarlo` and `plNested` calls
+    * Add default arguments to argument handler functions
+
+## exprso 0.2.9
+---------------------
+* Update `mod` modules
+    * New `modShuffle` function shuffles feature order by random sampling
+    * New `modScale` function rescales sample vectors by a factor range
+* Update `build` modules
+    * New `buildDT` function builds decision tree model
+        * Add `predict.ExprsMachine` and `predict.RegrsModel` support
+    * New `buildFRB` function builds fuzzy rule based model
+        * Add `predict.ExprsMachine` and `predict.RegrsModel` support
+    * New `buildLR` function builds logistic regression model
+        * Add `predict.ExprsMachine` support
+    * New `buildLM` and `buildGLM` functions
+        * Add `predict.RegrsModel` support
+* General changes
+    * `plMonteCarlo` now accepts a list of `ctrlModSet` handlers
+    * `plMonteCarlo` now skips `fs` if `ctrlFS = NULL`
+    * `plNested` now skips `fs` if `ctrlFS = NULL`
+
+## exprso 0.2.8
+---------------------
+* New `modRatios` function recasts data as feature ratios
+
 ## exprso 0.2.7
 ---------------------
 * General changes
@@ -310,7 +400,7 @@
 * 5.1-fs-binary.R
     * `fsStats` has tryCatch to address rare error
 
-## exprso 1.0.1
+## exprso 0.1.1
 ---------------------
 * 1.2-methods.R
     * `summary` method now accommodates lists of vector arguments

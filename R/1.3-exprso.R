@@ -29,7 +29,11 @@
 #'  \code{class(y) == "character"} or \code{class(y) == "factor"},
 #'  \code{exprso} prepares data for binary or multi-class classification.
 #'  Else, \code{exprso} prepares data for regression. If \code{y} is a
-#'  matrix, the program assumes the first column is the outcome.
+#'  matrix, the program uses the column in \code{label}.
+#' @param label A numeric scalar or character string. The column to
+#'  use as the label if \code{y} is a matrix.
+#' @param switch A logical scalar. Toggles which class label is
+#'  called Control in binary classification.
 #' @return An \code{ExprsArray} object.
 #'
 #' @examples
@@ -44,9 +48,9 @@
 #' predict(mach, arrays[[2]])
 #' }
 #' @export
-exprso <- function(x, y){
+exprso <- function(x, y, label = 1, switch = FALSE){
 
-  if(length(y) != nrow(x)) stop("Incorrect number of outcomes.")
+  if(length(label) > 1) stop("More than one label specified.")
   array <-
     new("ExprsArray",
         exprs = t(as.data.frame(x)), annot = as.data.frame(y),
@@ -57,15 +61,19 @@ exprso <- function(x, y){
   colnames(array@exprs) <- paste0("x", 1:ncol(array@exprs))
   colnames(array@exprs) <- make.names(colnames(array@exprs), unique = TRUE)
   rownames(array@annot) <- colnames(array@exprs)
-  labels <- array@annot[,1]
+  labels <- array@annot[,label]
 
   # Set sub-class to guide fs and build modules
+  if(length(labels) != nrow(x)) stop("Incorrect number of outcomes.")
   if(class(labels) == "logical") stop("Boolean outcomes not supported.")
   if(class(labels) == "character" | class(labels) == "factor"){
     if(length(unique(y)) == 2){
       print("Preparing data for binary classification.")
       class(array) <- "ExprsBinary"
-      array@annot$defineCase <- ifelse(labels == unique(labels)[1], "Control", "Case")
+      print("Converting binary labels to CONTROL / CASE.")
+      control <- unique(labels)[as.numeric(switch) + 1]
+      print(paste("CONTROL:", control, "(override with 'switch')"))
+      array@annot$defineCase <- ifelse(labels == control, "Control", "Case")
     }else{
       print("Preparing data for multi-class classification.")
       class(array) <- "ExprsMulti"
@@ -103,6 +111,10 @@ exprso <- function(x, y){
 #'
 #' - \code{\link{modTransform}}
 #'
+#' - \code{\link{modSample}}
+#'
+#' - \code{\link{modInclude}}
+#'
 #' - \code{\link{modNormalize}}
 #'
 #' - \code{\link{modTMM}}
@@ -110,6 +122,10 @@ exprso <- function(x, y){
 #' - \code{\link{modAcomp}}
 #'
 #' - \code{\link{modCLR}}
+#'
+#' - \code{\link{modRatios}}
+#'
+#' - \code{\link{modScale}}
 NULL
 
 #' @name split
@@ -123,6 +139,10 @@ NULL
 #' - \code{\link{splitSample}}
 #'
 #' - \code{\link{splitStratify}}
+#'
+#' - \code{\link{splitBalanced}}
+#'
+#' - \code{\link{splitBy}}
 NULL
 
 #' @name fs
@@ -152,6 +172,8 @@ NULL
 #' - \code{\link{fsEdger}}
 #'
 #' - \code{\link{fsMrmre}}
+#'
+#' - \code{\link{fsRankProd}}
 #'
 #' - \code{\link{fsPropd}}
 #'
@@ -188,9 +210,19 @@ NULL
 #'
 #' - \code{\link{buildSVM}}
 #'
+#' - \code{\link{buildLM}}
+#'
+#' - \code{\link{buildGLM}}
+#'
+#' - \code{\link{buildLR}}
+#'
 #' - \code{\link{buildANN}}
 #'
+#' - \code{\link{buildDT}}
+#'
 #' - \code{\link{buildRF}}
+#'
+#' - \code{\link{buildFRB}}
 #'
 #' - \code{\link{buildDNN}}
 #'

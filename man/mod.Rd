@@ -14,6 +14,10 @@ The \code{exprso} package includes these data process modules:
 
 - \code{\link{modTransform}}
 
+- \code{\link{modSample}}
+
+- \code{\link{modInclude}}
+
 - \code{\link{modNormalize}}
 
 - \code{\link{modTMM}}
@@ -21,4 +25,8 @@ The \code{exprso} package includes these data process modules:
 - \code{\link{modAcomp}}
 
 - \code{\link{modCLR}}
+
+- \code{\link{modRatios}}
+
+- \code{\link{modScale}}
 }
