@@ -42,7 +42,7 @@ array.train <-
 array.train <-
   fsPrcomp(array.train, top = 50)
 
-## ---- results = "hide"---------------------------------------------------
+## ---- results = "hide", message = FALSE----------------------------------
 plot(array.train)
 
 ## ------------------------------------------------------------------------
@@ -56,7 +56,7 @@ pred <-
 ## ------------------------------------------------------------------------
 calcStats(pred)
 
-## ---- results = "hide", warning = FALSE----------------------------------
+## ---- results = "hide", warning = FALSE, message = FALSE-----------------
 gs <-
   plGrid(array.train = array.train,
          array.valid = array.test,

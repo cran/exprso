@@ -1,3 +1,28 @@
+## exprso 0.4.0
+---------------------
+* Package maintenance
+    * Clean up message dump within vignettes
+    * Update `fsPropd` for compatibility with `propr` version 4.0
+    * Update tests for compatibility with `e1071` version 1.7
+    * Remove the `gtools` import
+
+## exprso 0.3.9
+---------------------
+* Update `mod` modules
+    * Simplify `modSkew` function to add feature based only on `alpha`
+* Update `fs` modules
+    * Add `fsPathClassRFE` to the `?fs` help file
+
+## exprso 0.3.8
+---------------------
+* Update `mod` modules
+    * New `modSkew` function skews sample vectors by a factor range
+
+## exprso 0.3.7
+---------------------
+* Update `exprso` import
+    * Fix bug caused by importing an annotation table
+
 ## exprso 0.3.6
 ---------------------
 * General changes
@@ -69,7 +94,7 @@
 ---------------------
 * Update `mod` modules
     * New `modShuffle` function shuffles feature order by random sampling
-    * New `modScale` function rescales sample vectors by a factor range
+    * New `modScale` function scales sample vectors by a factor range
 * Update `build` modules
     * New `buildDT` function builds decision tree model
         * Add `predict.ExprsMachine` and `predict.RegrsModel` support

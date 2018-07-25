@@ -12,7 +12,7 @@ splitSets <- array %>%
   modTransform %>% modNormalize %>%
   splitSample(percent.include = 67)
 
-## ---- results = "hide"---------------------------------------------------
+## ---- results = "hide", message = FALSE----------------------------------
 pred <- trainingSet(splitSets) %>%
   fsStats(how = "t.test") %>%
   fsPrcomp(top = 2) %T>%
@@ -149,7 +149,7 @@ pl %>% buildEnsemble %>%
   predict(testSet(splitSets)) %>%
   calcStats
 
-## ---- results = "hide"---------------------------------------------------
+## ---- results = "hide", message = FALSE----------------------------------
 fs <- ctrlFeatureSelect(func = "fsStats", top = 0, how = "t.test")
 
 pl <- plGridMulti(trainingSet(splitSets), testSet(splitSets),
