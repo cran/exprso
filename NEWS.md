@@ -1,3 +1,48 @@
+## exprso 0.4.7
+---------------------
+* Update `exprso` import
+    * Correctly apply `make.names` to feature names
+* Improvements to `calcStats`
+    * Add correlation and R-squared measures
+
+## exprso 0.4.6
+---------------------
+* Update `mod` modules
+    * New `modPermute` will permute predictor variables
+* Update `getWeights` method
+    * Extend support to `randomForest` objects
+
+## exprso 0.4.5
+---------------------
+* Update `fs` modules
+    * Extend `fsBalance` to support `sbp.fromPropd`
+
+## exprso 0.4.4
+---------------------
+* Update `mod` modules
+    * Extend `modHistory` to support balance deployment
+* Update `fs` modules
+    * New `fsBalance` to convert features into balances
+    * Uses `sbp.subset` if `ternary` or `ratios` argument is provided
+* Package maintenance
+    * Turn README into FAQ vignette
+
+## exprso 0.4.3
+---------------------
+* New `getWeights` method
+    * New method gets LASSO weights for `ExprsModel` and related objects
+
+## exprso 0.4.2
+---------------------
+* Update `build` modules
+    * Extend `buildGLM` to work for any outcome (continuous and factor)
+    * New `buildLASSO` module for LASSO and Ridge regression
+
+## exprso 0.4.1
+---------------------
+* Update `mod` modules
+    * Add `alpha` argument to `modRatios` function
+
 ## exprso 0.4.0
 ---------------------
 * Package maintenance

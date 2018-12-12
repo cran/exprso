@@ -41,6 +41,10 @@ modHistory <- function(object, reference){
       data <- data.frame(t(object@exprs[indexedFeatures, , drop = FALSE]))
       if("prcomp" %in% class(indexedModel)){
         exprs.i <- t(predict(indexedModel, data))
+      }else if("SBP" %in% class(indexedModel)){
+        packageCheck("balance")
+        exprs.i <- t(balance::balance.fromSBP(data, indexedModel))
+        colnames(exprs.i) <- rownames(data)
       }else{
         stop("Reduction model not recognized.")
       }
@@ -131,6 +135,27 @@ modSample <- function(object, size = 0){
   if(size == 0) size <- nrow(object@exprs)
   keep <- sample(1:nrow(object@exprs), size = size)
   object@exprs <- object@exprs[keep,,drop = FALSE]
+  return(object)
+}
+
+#' Permute Features in Data
+#'
+#' \code{modPermute} randomly samples each feature in the data
+#'  without replacement. This method helps establish a null
+#'  model for the purpose of testing the significance of
+#'  observed prediction error estimates.
+#'
+#' @inheritParams modFilter
+#' @return A pre-processed \code{ExprsArray} object.
+#' @export
+modPermute <- function(object){
+
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
+
+  oldnames <- colnames(object@exprs)
+  object@exprs <- t(apply(object@exprs, 1, sample))
+  colnames(object@exprs) <- oldnames
   return(object)
 }
 
@@ -237,21 +262,24 @@ modCLR <- function(object){
   return(object)
 }
 
-#' Recast Data as Feature Ratios
+#' Recast Data as Feature (Log-)Ratios
 #'
 #' \code{modRatios} recasts a data set with N feature columns as a new
-#'  data set with N * (N - 1) / 2 feature ratio columns.
+#'  data set with N * (N - 1) / 2 feature (log-)ratio columns.
 #'
 #' @inheritParams modHistory
+#' @param alpha A numeric scalar. This argument guides
+#'  a Box-Cox transformation to approximate log-ratios in the
+#'  presence of zeros. Skip with \code{NA}.
 #' @return A pre-processed \code{ExprsArray} object.
 #' @export
-modRatios <- function(object){
+modRatios <- function(object, alpha = NA){
 
   packageCheck("propr")
   classCheck(object, "ExprsArray",
              "This function is applied to the results of ?exprso.")
 
-  object@exprs <- t(propr::ratios(t(object@exprs)))
+  object@exprs <- t(propr::ratios(t(object@exprs), alpha = NA))
   return(object)
 }
 
