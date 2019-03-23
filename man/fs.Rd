@@ -20,17 +20,19 @@ The \code{exprso} package includes these feature selection modules:
 
 - \code{\link{fsPrcomp}}
 
+- \code{\link{fsPCA}}
+
+- \code{\link{fsRDA}}
+
 - \code{\link{fsEbayes}}
 
 - \code{\link{fsEdger}}
 
 - \code{\link{fsMrmre}}
 
-- \code{\link{fsPathClassRFE}}
-
 - \code{\link{fsRankProd}}
 
-- \code{\link{fsPropd}}
+- \code{\link{fsBalance}}
 }
 \details{
 Considering the high-dimensionality of many datasets, it is prudent and

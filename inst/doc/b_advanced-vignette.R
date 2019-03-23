@@ -23,7 +23,7 @@ pred <- trainingSet(splitSets) %>%
 
 ## ---- results = "hide", eval = FALSE-------------------------------------
 #  ss <- ctrlSplitSet(func = "splitSample", percent.include = 67, replace = TRUE)
-#  fs <- ctrlFeatureSelect(func = "fsPathClassRFE", top = 0)
+#  fs <- ctrlFeatureSelect(func = "fsStats", top = 0)
 #  gs <- ctrlGridSearch(func = "plGrid", top = 0, how = "buildLDA")
 #  
 #  pred <- trainingSet(splitSets) %>%

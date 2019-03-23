@@ -176,6 +176,7 @@ buildSVM <- function(object, top = 0, ...){ # args to svm
 
            # Perform SVM via ~ method (permits plotting)
            args <- getArgs(...)
+           args <- defaultArg("kernel", "linear", args)
            args <- forceArg("probability", TRUE, args)
            args <- forceArg("cross", 0, args)
            df <- data.frame(data, "defineCase" = labels)
@@ -282,6 +283,8 @@ buildLASSO <- function(object, top = 0, ...){ # args to cv.glmnet
              # Perform LASSO GLM
              args <- getArgs(...)
              args <- defaultArg("nfolds", 5, args)
+             args <- defaultArg("intercept", FALSE, args)
+             args <- defaultArg("alpha", 1, args)
              args <- append(list("x" = data, "y" = labels), args)
              do.call(glmnet::cv.glmnet, args)
            }, ...)
@@ -294,6 +297,8 @@ buildLASSO <- function(object, top = 0, ...){ # args to cv.glmnet
              # Perform LASSO GLM
              args <- getArgs(...)
              args <- defaultArg("nfolds", 5, args)
+             args <- defaultArg("intercept", FALSE, args)
+             args <- defaultArg("alpha", 1, args)
              args <- forceArg("family", "binomial", args)
              args <- append(list("x" = data, "y" = as.numeric(labels) - 1), args)
              do.call(glmnet::cv.glmnet, args)

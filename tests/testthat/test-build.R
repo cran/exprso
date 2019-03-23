@@ -1,5 +1,5 @@
 library(exprso)
-context("build")
+suppressWarnings(RNGversion("3.5.0"))
 
 ###########################################################
 ### Build and predict ExprsMachine objects
@@ -210,7 +210,7 @@ test_that("ExprsMulti models predict only on ExprsMulti datasets", {
   )
 })
 
-mach.multi <- doMulti(arrayMulti.train, top = 0, method = "buildSVM")
+mach.multi <- doMulti(arrayMulti.train, top = 0, method = "buildSVM", kernel = "radial")
 
 test_that("doMulti performs 1 vs. all build", {
 

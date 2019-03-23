@@ -311,36 +311,45 @@ fsPrcomp <- function(object, top = 0, keep = 0, ...){ # args to prcomp
       }, keep, ...)
 }
 
-#' Select Features by Recursive Feature Elimination
+#' Reduce Dimensions by PCA
 #'
-#' \code{fsPathClassRFE} selects features using the \code{fit.rfe} function
-#'  from the \code{pathClass} package.
+#' \code{fsPCA} reduces dimensions using the \code{prcomp} function.
+#'  The reduction model is saved and deployed automatically on any new
+#'  data during model validation.
 #'
 #' @inheritParams fs.
 #' @return Returns an \code{ExprsArray} object.
 #' @export
-fsPathClassRFE <- function(object, top = 0, keep = 0, ...){ # args to fit.rfe
+fsPCA <- function(object, top = 0, keep = 0, ...){ # args to prcomp
 
-  packageCheck("pathClass")
-  classCheck(object, "ExprsBinary",
-             "This feature selection method only works for binary classification tasks.")
+  fsPrcomp(object, top = top, keep = keep, ...)
+}
+
+#' Reduce Dimensions by RDA
+#'
+#' \code{fsRDA} reduces dimensions using the \code{rda} function
+#'  from the \code{vegan} package. The reduction model is saved and
+#'  deployed automatically on any new data during model validation.
+#'
+#' @inheritParams fs.
+#' @return Returns an \code{ExprsArray} object.
+#' @export
+fsRDA <- function(object, top = 0, keep = 0, ...){ # args to rda
+
+  packageCheck("vegan")
+  classCheck(object, "ExprsArray",
+             "This function is applied to the results of ?exprso.")
 
   fs.(object, top,
       uniqueFx = function(data, outcome, top, ...){
 
-        # Set up "make.names" key for improper @exprs row.names
-        labels <- factor(outcome, levels = c("Control", "Case"))
-        key <- data.frame("old" = colnames(data), "new" = make.names(colnames(data)))
+        # ATTENTION: We want dependent variables as columns
+        # NOTE: as.data.frame will not rename columns
+        reductionModel <- vegan::rda(data.frame(data), ...)
 
-        # NOTE: RFE as assembled by pathClass is via a linear kernel only
-        # NOTE: By default, fit.rfe iterates through C = 10^c(-3:3)
-        # Run fit.rfe()
-        rfe <- pathClass::fit.rfe(x = data, y = labels, ...)
-
-        # Use "make.names" key to return to original row.names
-        final <- merge(data.frame("new" = rfe$features), key, sort = FALSE)$old
-        if(length(final) < 2) stop("Uh oh! fsPathClassRFE did not find enough features!")
-        as.character(final)
+        # ATTENTION: predict(reductionModel, data, type = "wa") equals $CA$u
+        list(t(reductionModel$CA$u),
+             reductionModel)
       }, keep, ...)
 }
 
@@ -476,70 +485,6 @@ fsRankProd <- function(object, top = 0, keep = 0, ...){ # args to RankProducts
         p <- apply(final$pval, 1, min)
         top[order(p)]
       }, keep, ...)
-}
-
-#' Select Features by Differential Proportionality Analysis
-#'
-#' \code{fsPropd} selects features using the \code{propd} function
-#'  from the \code{propr} package.
-#'
-#' @inheritParams fs.
-#' @param modRatios A logical scalar. Toggles whether to compute theta from
-#'  the feature ratios as provided. Set \code{modRatios = TRUE} if data were
-#'  recasted by a prior \code{modRatios} call. If \code{TRUE}, the \code{alpha}
-#'  and \code{weighted} arguments will not work.
-#' @return Returns an \code{ExprsArray} object.
-#' @export
-fsPropd <- function(object, top = 0, keep = 0, modRatios = FALSE, ...){ # args to propd
-
-  packageCheck("propr")
-  classCheck(object, "ExprsBinary",
-             "This feature selection method only works for binary classification tasks.")
-
-  if(modRatios){
-
-    fs.(object, top,
-        uniqueFx = function(data, outcome, top, ...){
-
-          # Set up groups and sizes
-          grp1 <- as.character(outcome) == "Control"
-          p1 <- sum(grp1) - 1
-          grp2 <- !grp1
-          p2 <- sum(grp2) - 1
-          p <- p1 + p2 + 1
-
-          # Calculate theta
-          thetas <- apply(data, 2, function(x){
-            (p1 * stats::var(x[grp1]) + p2 * stats::var(x[grp2])) / (p * stats::var(x))
-          })
-
-          # Sort results
-          top <- names(thetas[order(thetas)])
-          top
-        }, keep, ...)
-
-  }else{
-
-    fs.(object, top,
-        uniqueFx = function(data, outcome, top, ...){
-
-          # Order pairs by theta
-          pd <- suppressMessages(propr::propd(data, outcome))
-          pd@results <- pd@results[order(pd@results$theta),]
-
-          # Index features by when they first appear
-          nrows <- nrow(pd@results)
-          index <- floor(seq(1, nrows+.5, .5))
-          odds <- as.logical(1:(nrows*2) %% 2)
-          index[odds] <- index[odds] + nrows
-          join <- c(pd@results$Partner, pd@results$Pair)
-          join <- join[index]
-
-          # Rank features by first appearance
-          rankedfeats <- unique(join)
-          top[rankedfeats]
-        }, keep, ...)
-  }
 }
 
 #' Convert Features into Balances

@@ -1,6 +1,6 @@
 Package: exprso
 Title: Rapid Deployment of Machine Learning Algorithms
-Version: 0.4.7
+Version: 0.5.1
 URL: http://github.com/tpq/exprso
 BugReports: http://github.com/tpq/exprso/issues
 Authors@R: c(
@@ -23,13 +23,12 @@ Imports: cluster, MASS, e1071, glmnet, frbs, lattice, methods, nnet,
         plyr, randomForest, ROCR, rpart, sampling, stats
 Depends: R (>= 3.2.2), kernlab
 Suggests: balance, Biobase, edgeR, GEOquery, h2o, knitr, limma,
-        magrittr, mRMRe, pathClass, propr, RankProd, rmarkdown,
-        testthat
+        magrittr, mRMRe, propr, RankProd, rmarkdown, testthat, vegan
 NeedsCompilation: no
-Packaged: 2018-12-12 05:10:23 UTC; thom
+Packaged: 2019-03-23 03:56:53 UTC; thom
 Author: Thomas Quinn [aut, cre],
   Daniel Tylee [ctb],
   Samuel Lee [ctb]
 Maintainer: Thomas Quinn <contacttomquinn@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-12-12 06:10:02 UTC
+Date/Publication: 2019-03-23 05:20:03 UTC
